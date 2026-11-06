@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="it" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI School Quest - Indagine AI a Scuola</title>
+
+  <!-- Tailwind CSS & Google Fonts -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome Icons & Chart.js -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              dark: '#0B0F19',
+              card: '#151D2A',
+              border: '#232D3F',
+              cyan: '#06B6D4',
+              pink: '#EC4899',
+              purple: '#8B5CF6',
+              yellow: '#F59E0B'
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            heading: ['"Outfit"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #0B0F19;
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(6, 182, 212, 0.12) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(236, 72, 153, 0.12) 0px, transparent 50%),
+        radial-gradient(at 50% 50%, rgba(139, 92, 246, 0.08) 0px, transparent 50%);
+      background-attachment: fixed;
+    }
+    .glass-card {
+      background: rgba(21, 29, 42, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .option-card {
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .option-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(6, 182, 212, 0.5);
+    }
+    .option-card.selected {
+      border-color: #06B6D4;
+      background: rgba(6, 182, 212, 0.15);
+      box-shadow: 0 0 20px rgba(6, 182, 212, 0.25);
+    }
+    .step-view {
+      display: none;
+    }
+    .step-view.active {
+      display: block;
+      animation: fadeIn 0.4s ease-out forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body class="font-sans text-slate-100 min-h-screen pb-12 flex flex-col justify-between">
+
+  <!-- Main Container -->
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 pt-6 sm:pt-10 w-full">
+
+    <!-- Header App -->
+    <header class="text-center mb-8">
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-800/80 border border-slate-700 text-brand-cyan text-xs font-bold tracking-wide uppercase mb-3 shadow-inner">
+         Fondazione Dalmine
+      </div>
+      <h1 class="font-heading text-3xl sm:text-5xl font-black tracking-tight text-white">
+        Laboratorio di<br/> <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-cyan via-brand-purple to-brand-pink">Intelligenza Artificiale</span>
+      </h1>
+      <p class="text-slate-400 text-sm sm:text-base mt-2 max-w-lg mx-auto">
+        Iniziamo a conoscere l'argomento con un breve sondaggio.
+      </p>
+    </header>
+
+    <!-- STEP 1: CONFIGURAZIONE GRUPPO & CLASSE -->
+    <div id="step-setup" class="step-view active">
+      <div class="glass-card rounded-3xl p-6 sm:p-10 shadow-2xl relative overflow-hidden">
+        <div class="absolute -top-24 -right-24 w-48 h-48 bg-brand-cyan/20 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-800">
+          <div class="w-12 h-12 rounded-2xl bg-brand-cyan/20 border border-brand-cyan/30 flex items-center justify-center text-brand-cyan text-xl font-bold">
+            <i class="fa-solid fa-school"></i>
+          </div>
+          <div>
+            <h2 class="font-heading text-xl font-bold text-white">Configurazione del Gruppo</h2>
+            <p class="text-xs text-slate-400">Inserisci i dati della scuola per sincronizzarti con la classe</p>
+          </div>
+        </div>
+
+        <form onsubmit="event.preventDefault(); avviaGioco();" class="space-y-6">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <!-- Scuola -->
+            <div class="space-y-2">
+              <label for="scuola" class="block text-sm font-semibold text-slate-200">
+                <i class="fa-solid fa-building-columns text-brand-cyan mr-1.5"></i> Nome Istituto / Scuola <span class="text-pink-500">*</span>
+              </label>
+              <input type="text" id="scuola" required placeholder="Es. Liceo Volta, IC Marconi" 
+                     class="w-full bg-slate-900/90 border border-slate-700 focus:border-brand-cyan focus:ring-2 focus:ring-brand-cyan/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 outline-none transition">
+            </div>
+
+            <!-- Grado -->
+            <div class="space-y-2">
+              <label for="grado" class="block text-sm font-semibold text-slate-200">
+                <i class="fa-solid fa-graduation-cap text-brand-purple mr-1.5"></i> Grado Scolastico <span class="text-pink-500">*</span>
+              </label>
+              <select id="grado" required 
+                      class="w-full bg-slate-900/90 border border-slate-700 focus:border-brand-purple focus:ring-2 focus:ring-brand-purple/20 rounded-xl px-4 py-3 text-white outline-none transition">
+                <option value="Media">Scuola Secondaria I Grado (Medie)</option>
+                <option value="Superiore-Biennio">Scuola Secondaria II Grado (Biennio)</option>
+                <option value="Superiore-Triennio">Scuola Secondaria II Grado (Triennio)</option>
+              </select>
+            </div>
+
+            <!-- Classe -->
+            <div class="space-y-2">
+              <label for="classe" class="block text-sm font-semibold text-slate-200">
+                <i class="fa-solid fa-shapes text-brand-pink mr-1.5"></i> Classe e Sezione <span class="text-pink-500">*</span>
+              </label>
+              <input type="text" id="classe" required placeholder="Es. 3A, 4BS, 1C" 
+                     class="w-full bg-slate-900/90 border border-slate-700 focus:border-brand-pink focus:ring-2 focus:ring-brand-pink/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 outline-none transition">
+            </div>
+
+            <!-- Codice Sessione -->
+            <div class="space-y-2">
+              <label for="codiceSessione" class="block text-sm font-semibold text-slate-200 flex items-center justify-between">
+                <span><i class="fa-solid fa-key text-emerald-400 mr-1.5"></i> Codice Sessione Classe <span class="text-pink-500">*</span></span>
+                <span class="text-xs text-slate-400 font-normal">Condividi con i compagni</span>
+              </label>
+              <input type="text" id="codiceSessione" required placeholder="Es. VOLTA-3A-LAB" 
+                     class="w-full bg-slate-900/90 border border-emerald-500/50 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 outline-none transition font-mono uppercase tracking-wider">
+            </div>
+          </div>
+
+          <!-- Componenti del gruppo -->
+          <div class="pt-2">
+            <label class="block text-sm font-semibold text-slate-200 mb-2">
+              <i class="fa-solid fa-user-group text-brand-yellow mr-1.5"></i> Componenti di QUESTO Gruppo
+            </label>
+            <div class="flex items-center justify-between bg-slate-900/90 border border-slate-700 rounded-2xl p-4">
+              <div class="text-sm text-slate-400">Quanti studenti stanno rispondendo da questo dispositivo?</div>
+              <div class="flex items-center gap-4">
+                <button type="button" onclick="modificaPartecipanti(-1)" 
+                        class="w-10 h-10 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 text-white font-bold flex items-center justify-center text-lg border border-slate-600 transition">
+                  <i class="fa-solid fa-minus"></i>
+                </button>
+                <span id="numPartecipantiDisplay" class="font-heading text-2xl font-extrabold text-brand-yellow w-8 text-center">1</span>
+                <button type="button" onclick="modificaPartecipanti(1)" 
+                        class="w-10 h-10 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 text-white font-bold flex items-center justify-center text-lg border border-slate-600 transition">
+                  <i class="fa-solid fa-plus"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" 
+                  class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-brand-cyan via-brand-purple to-brand-pink text-white font-heading font-extrabold text-lg shadow-lg shadow-brand-cyan/25 hover:opacity-95 active:scale-[0.99] transition cursor-pointer flex items-center justify-center gap-3">
+            <i class="fa-solid fa-square-poll-vertical text-xl"></i> Inizia il Sondaggio
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- STEP 2: DOMANDE / VOTAZIONE GIOCATORE -->
+    <div id="step-quiz" class="step-view">
+      <!-- Player Header Bar -->
+      <div class="glass-card rounded-2xl p-4 mb-6 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div id="avatarContainer" class="w-12 h-12 rounded-xl bg-brand-purple/20 border border-brand-purple/40 text-brand-purple flex items-center justify-center text-2xl">
+            <i class="fa-solid fa-user-astronaut"></i>
+          </div>
+          <div>
+            <span id="labelGiocatoreCorrente" class="font-heading text-lg font-bold text-white block">Giocatore 1</span>
+            <span id="labelInfoGruppo" class="text-xs text-slate-400">Classe 3A • ID: VOLTA-3A</span>
+          </div>
+        </div>
+        <div class="text-right">
+          <span id="badgeProgresso" class="text-xs font-bold text-brand-cyan bg-brand-cyan/10 border border-brand-cyan/30 px-3 py-1 rounded-full">1 di 3</span>
+          <div class="w-28 sm:w-36 bg-slate-800 h-2 rounded-full mt-2 overflow-hidden border border-slate-700">
+            <div id="progressBar" class="bg-gradient-to-r from-brand-cyan to-brand-pink h-full transition-all duration-300 w-1/3"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-3xl p-6 sm:p-8 shadow-2xl space-y-8">
+        
+        <!-- Domanda 1 -->
+        <div class="space-y-3">
+          <label class="block text-base font-bold text-white">
+            1. Usa l'Intelligenza Artificiale? <span class="text-brand-pink">*</span>
+          </label>
+          <div class="grid grid-cols-3 gap-3">
+            <button type="button" onclick="selezionaOpzioneSingola('usaAi', 'Sì', this)" class="option-card option-usaAi p-4 rounded-2xl bg-slate-900 border border-slate-700 text-center text-slate-200 font-semibold hover:text-white">
+              <i class="fa-solid fa-circle-check text-emerald-400 text-2xl block mb-2"></i> Sì
+            </button>
+            <button type="button" onclick="selezionaOpzioneSingola('usaAi', 'A volte', this)" class="option-card option-usaAi p-4 rounded-2xl bg-slate-900 border border-slate-700 text-center text-slate-200 font-semibold hover:text-white">
+              <i class="fa-solid fa-clock-rotate-left text-brand-yellow text-2xl block mb-2"></i> A volte
+            </button>
+            <button type="button" onclick="selezionaOpzioneSingola('usaAi', 'No', this)" class="option-card option-usaAi p-4 rounded-2xl bg-slate-900 border border-slate-700 text-center text-slate-200 font-semibold hover:text-white">
+              <i class="fa-solid fa-circle-xmark text-rose-500 text-2xl block mb-2"></i> No
+            </button>
+          </div>
+          <input type="hidden" id="inputUsaAi">
+        </div>
+
+        <!-- Domanda 2 -->
+        <div class="space-y-3">
+          <label class="block text-base font-bold text-white">
+            2. Con che frequenza lo usi? <span class="text-brand-pink">*</span>
+          </label>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <button type="button" onclick="selezionaOpzioneSingola('frequenza', 'Giornaliera', this)" class="option-card option-frequenza p-3.5 rounded-2xl bg-slate-900 border border-slate-700 text-center text-slate-200 font-semibold text-sm">
+              <i class="fa-solid fa-bolt text-amber-400 text-xl block mb-1.5"></i> Tutti i giorni
+            </button>
+            <button type="button" onclick="selezionaOpzioneSingola('frequenza', 'Settimanale', this)" class="option-card option-frequenza p-3.5 rounded-2xl bg-slate-900 border border-slate-700 text-center text-slate-200 font-semibold text-sm">
+              <i class="fa-solid fa-calendar-week text-brand-cyan text-xl block mb-1.5"></i> Ogni settimana
+            </button>
+            <button type="button" onclick="selezionaOpzioneSingola('frequenza', 'Mensile', this)" class="option-card option-frequenza p-3.5 rounded-2xl bg-slate-900 border border-slate-700 text-center text-slate-200 font-semibold text-sm">
+              <i class="fa-solid fa-calendar-days text-brand-purple text-xl block mb-1.5"></i> Qualche volta/mese
+            </button>
+            <button type="button" onclick="selezionaOpzioneSingola('frequenza', 'Rara/Mai', this)" class="option-card option-frequenza p-3.5 rounded-2xl bg-slate-900 border border-slate-700 text-center text-slate-200 font-semibold text-sm">
+              <i class="fa-solid fa-ban text-slate-400 text-xl block mb-1.5"></i> Rara o Mai
+            </button>
+          </div>
+          <input type="hidden" id="inputFrequenza">
+        </div>
+
+        <!-- Domanda 3 (Selezione multipla + Campo Altro) -->
+        <div class="space-y-3">
+          <label class="block text-base font-bold text-white flex items-center justify-between">
+            <span>3. Quali strumenti usi di più?</span>
+            <span class="text-xs text-brand-cyan font-normal">Scelta multipla</span>
+          </label>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <button type="button" onclick="toggleMultiOpzione('strumenti', 'ChatGPT', this)" class="option-card option-strumento p-3 rounded-2xl bg-slate-900 border border-slate-700 text-left px-4 flex items-center gap-3">
+              <i class="fa-solid fa-robot text-emerald-400 text-lg"></i> <span class="font-semibold text-sm">ChatGPT</span>
+            </button>
+            <button type="button" onclick="toggleMultiOpzione('strumenti', 'Gemini', this)" class="option-card option-strumento p-3 rounded-2xl bg-slate-900 border border-slate-700 text-left px-4 flex items-center gap-3">
+              <i class="fa-solid fa-sparkles text-brand-cyan text-lg"></i> <span class="font-semibold text-sm">Gemini / Copilot</span>
+            </button>
+            <button type="button" onclick="toggleMultiOpzione('strumenti', 'Canva AI', this)" class="option-card option-strumento p-3 rounded-2xl bg-slate-900 border border-slate-700 text-left px-4 flex items-center gap-3">
+              <i class="fa-solid fa-palette text-brand-pink text-lg"></i> <span class="font-semibold text-sm">Canva AI</span>
+            </button>
+            <button type="button" onclick="toggleMultiOpzione('strumenti', 'Claude', this)" class="option-card option-strumento p-3 rounded-2xl bg-slate-900 border border-slate-700 text-left px-4 flex items-center gap-3">
+              <i class="fa-solid fa-brain text-purple-400 text-lg"></i> <span class="font-semibold text-sm">Claude / Perplexity</span>
+            </button>
+            <button type="button" onclick="toggleMultiOpzione('strumenti', 'Altro', this)" class="option-card option-strumento p-3 rounded-2xl bg-slate-900 border border-slate-700 text-left px-4 flex items-center gap-3">
+              <i class="fa-solid fa-plus text-brand-yellow text-lg"></i> <span class="font-semibold text-sm">Altro tool</span>
+            </button>
+            <button type="button" onclick="toggleMultiOpzione('strumenti', 'Nessuno', this)" class="option-card option-strumento p-3 rounded-2xl bg-slate-900 border border-slate-700 text-left px-4 flex items-center gap-3">
+              <i class="fa-solid fa-minus text-slate-400 text-lg"></i> <span class="font-semibold text-sm">Nessuno</span>
+            </button>
+          </div>
+          <!-- Campo Altro Strumento -->
+          <div id="containerAltroStrumento" class="hidden mt-2">
+            <input type="text" id="inputAltroStrumento" placeholder="Specifica altri strumenti..." 
+                   class="w-full bg-slate-900/90 border border-brand-yellow/50 focus:border-brand-yellow rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none">
+          </div>
+        </div>
+
+        <!-- Domanda 4 (Selezione multipla + Campo Altro) -->
+        <div class="space-y-3">
+          <label class="block text-base font-bold text-white flex items-center justify-between">
+            <span>4. Per cosa lo usi prevalemente?</span>
+            <span class="text-xs text-brand-cyan font-normal">Scelta multipla</span>
+          </label>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <button type="button" onclick="toggleMultiOpzione('scopi', 'Studio/Compiti', this)" class="option-card option-scopo p-3.5 rounded-2xl bg-slate-900 border border-slate-700 text-left px-4 flex items-center gap-3">
+              <i class="fa-solid fa-book-open text-blue-400 text-lg"></i> <span class="font-semibold text-sm">Studio e Spiegazioni</span>
+            </button>
+            <button type="button" onclick="toggleMultiOpzione('scopi', 'Scrittura/Riassunti', this)" class="option-card option-scopo p-3.5 rounded-2xl bg-slate-900 border border-slate-700 text-left px-4 flex items-center gap-3">
+              <i class="fa-solid fa-pen-nib text-brand-pink text-lg"></i> <span class="font-semibold text-sm">Scrivere / Riassumere</span>
+            </button>
+            <button type="button" onclick="toggleMultiOpzione('scopi', 'Coding/Problemi', this)" class="option-card option-scopo p-3.5 rounded-2xl bg-slate-900 border border-slate-700 text-left px-4 flex items-center gap-3">
+              <i class="fa-solid fa-code text-emerald-400 text-lg"></i> <span class="font-semibold text-sm">Coding / Informatica</span>
+            </button>
+            <button type="button" onclick="toggleMultiOpzione('scopi', 'Arte/Immagini', this)" class="option-card option-scopo p-3.5 rounded-2xl bg-slate-900 border border-slate-700 text-left px-4 flex items-center gap-3">
+              <i class="fa-solid fa-wand-magic text-purple-400 text-lg"></i> <span class="font-semibold text-sm">Generare Immagini/Arte</span>
+            </button>
+            <button type="button" onclick="toggleMultiOpzione('scopi', 'Svago', this)" class="option-card option-scopo p-3.5 rounded-2xl bg-slate-900 border border-slate-700 text-left px-4 flex items-center gap-3">
+              <i class="fa-solid fa-icons text-brand-yellow text-lg"></i> <span class="font-semibold text-sm">Svago e Curiosità</span>
+            </button>
+            <button type="button" onclick="toggleMultiOpzione('scopi', 'Altro', this)" class="option-card option-scopo p-3.5 rounded-2xl bg-slate-900 border border-slate-700 text-left px-4 flex items-center gap-3">
+              <i class="fa-solid fa-ellipsis text-slate-400 text-lg"></i> <span class="font-semibold text-sm">Altra finalità</span>
+            </button>
+          </div>
+          <!-- Campo Altro Scopo -->
+          <div id="containerAltroScopo" class="hidden mt-2">
+            <input type="text" id="inputAltroScopo" placeholder="Specifica altro uso..." 
+                   class="w-full bg-slate-900/90 border border-brand-purple/50 focus:border-brand-purple rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none">
+          </div>
+        </div>
+
+        <!-- Risposta Libera Note Facoltative -->
+        <div class="space-y-2 pt-2">
+          <label for="rispostaLibera" class="block text-sm font-semibold text-slate-300">
+            Note o commenti personali (opzionale)
+          </label>
+          <textarea id="rispostaLibera" rows="2" placeholder="Es. Uso ChatGPT principalmente per farmi spiegare la fisica..." 
+                    class="w-full bg-slate-900/90 border border-slate-700 focus:border-brand-cyan rounded-xl p-3 text-sm text-white placeholder-slate-500 outline-none resize-none"></textarea>
+        </div>
+
+        <button type="button" onclick="registraRispostaStudente()" 
+                class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-brand-cyan to-brand-purple text-white font-heading font-extrabold text-base shadow-lg hover:opacity-95 active:scale-[0.99] transition flex items-center justify-center gap-2">
+          <span id="btnTestoSalva">Registra Voto e Passa al Prossimo</span> <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- STEP 3: DASHBOARD RISULTATI & STATISTICHE -->
+    <div id="step-results" class="step-view">
+      
+      <!-- Banner di Congratulazioni & Lobby Live -->
+      <div class="glass-card rounded-3xl p-6 sm:p-8 mb-6 border border-emerald-500/30 text-center relative overflow-hidden">
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-sm font-bold mb-3">
+          <i class="fa-solid fa-satellite-dish animate-pulse text-emerald-400"></i> Sessione Live Classe Attiva
+        </div>
+        <h2 class="text-3xl font-extrabold text-white">Dashboard Risultati della Classe</h2>
+        <p id="subtitolorisultati" class="text-slate-400 text-sm mt-1">Sincronizzato in tempo reale con tutti i gruppi connessi.</p>
+
+        <!-- Dynamic Filter Bar (Singolo Gruppo vs Classe Live vs Globale) -->
+        <div class="flex flex-wrap items-center justify-center gap-2 mt-6">
+          <button type="button" onclick="cambiaVistaFiltro('gruppo')" id="btnFiltroGruppo" 
+                  class="px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-slate-800 text-slate-300 hover:bg-slate-700 transition">
+            <i class="fa-solid fa-user-group mr-1.5"></i> Il Tuo Gruppo
+          </button>
+          <button type="button" onclick="cambiaVistaFiltro('classe')" id="btnFiltroClasse" 
+                  class="px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-brand-cyan text-white shadow-lg shadow-cyan-500/30 transition">
+            <i class="fa-solid fa-users text-white mr-1.5"></i> Intera Classe (Live)
+          </button>
+          <button type="button" onclick="cambiaVistaFiltro('grado')" id="btnFiltroGrado" 
+                  class="px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-slate-800 text-slate-300 hover:bg-slate-700 transition">
+            <i class="fa-solid fa-earth-americas mr-1.5"></i> Globale (Tutti i dati)
+          </button>
+        </div>
+      </div>
+
+      <!-- Live Group Tracker Status Bar -->
+      <div class="glass-card rounded-2xl p-4 mb-6 border border-slate-700/60 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-2">
+          <span class="w-3 h-3 rounded-full bg-emerald-500 animate-ping"></span>
+          <span class="text-xs sm:text-sm font-bold text-white">Stato Gruppi della Sessione <span id="displayCodiceSessione" class="font-mono text-emerald-400">#---</span>:</span>
+        </div>
+        <div id="statusGruppiCompletati" class="text-xs sm:text-sm font-semibold text-slate-300">
+          Raccolta in corso...
+        </div>
+      </div>
+
+      <!-- Stat KPI Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <div class="glass-card rounded-2xl p-5 border-l-4 border-l-brand-cyan flex items-center gap-4">
+          <div class="w-12 h-12 rounded-xl bg-brand-cyan/20 text-brand-cyan flex items-center justify-center text-xl">
+            <i class="fa-solid fa-users-viewfinder"></i>
+          </div>
+          <div>
+            <div class="text-xs text-slate-400 uppercase tracking-wider font-bold">Studenti Votanti</div>
+            <div id="kpiTotalePartecipanti" class="text-2xl font-black text-white">0</div>
+          </div>
+        </div>
+
+        <div class="glass-card rounded-2xl p-5 border-l-4 border-l-brand-pink flex items-center gap-4">
+          <div class="w-12 h-12 rounded-xl bg-brand-pink/20 text-brand-pink flex items-center justify-center text-xl">
+            <i class="fa-solid fa-chart-line"></i>
+          </div>
+          <div>
+            <div class="text-xs text-slate-400 uppercase tracking-wider font-bold">Utilizzano l'AI</div>
+            <div id="kpiUsoPercent" class="text-2xl font-black text-white">0%</div>
+          </div>
+        </div>
+
+        <div class="glass-card rounded-2xl p-5 border-l-4 border-l-brand-purple flex items-center gap-4">
+          <div class="w-12 h-12 rounded-xl bg-brand-purple/20 text-brand-purple flex items-center justify-center text-xl">
+            <i class="fa-solid fa-trophy"></i>
+          </div>
+          <div>
+            <div class="text-xs text-slate-400 uppercase tracking-wider font-bold">Tool Preferito</div>
+            <div id="kpiToolTop" class="text-xl font-bold text-white truncate max-w-[130px]">-</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <!-- Chart Frequenza -->
+        <div class="glass-card rounded-3xl p-6">
+          <h3 class="font-heading font-bold text-white text-base mb-4 flex items-center gap-2">
+            <i class="fa-solid fa-chart-pie text-brand-pink"></i> Frequenza di Utilizzo
+          </h3>
+          <div class="h-64 relative flex items-center justify-center">
+            <canvas id="chartFrequenza"></canvas>
+          </div>
+        </div>
+
+        <!-- Chart Strumenti -->
+        <div class="glass-card rounded-3xl p-6">
+          <h3 class="font-heading font-bold text-white text-base mb-4 flex items-center gap-2">
+            <i class="fa-solid fa-chart-column text-brand-cyan"></i> Strumenti più Popolari
+          </h3>
+          <div class="h-64 relative">
+            <canvas id="chartStrumenti"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chart Scopi -->
+      <div class="glass-card rounded-3xl p-6 mb-6">
+        <h3 class="font-heading font-bold text-white text-base mb-4 flex items-center gap-2">
+          <i class="fa-solid fa-bullseye text-brand-purple"></i> Principali Ambiti di Utilizzo
+        </h3>
+        <div class="h-64 relative">
+          <canvas id="chartScopi"></canvas>
+        </div>
+      </div>
+
+      <!-- Risposte Libere / Note -->
+      <div class="glass-card rounded-3xl p-6 mb-6">
+        <h3 class="font-heading font-bold text-white text-base mb-3 flex items-center gap-2">
+          <i class="fa-solid fa-comments text-brand-yellow"></i> Note & Usi Specifici Inseriti
+        </h3>
+        <div id="containerNoteLibere" class="flex flex-wrap gap-2 max-h-48 overflow-y-auto p-1 text-xs">
+          <!-- Popolato via JS -->
+        </div>
+      </div>
+
+      <!-- Export & Reset Actions -->
+      <div class="flex flex-col sm:flex-row gap-4">
+        <button type="button" onclick="inviaDatiAGoogleSheets()" 
+                class="flex-1 py-4 px-6 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-heading font-bold text-sm shadow-lg shadow-emerald-900/30 transition flex items-center justify-center gap-2">
+          <i class="fa-solid fa-file-excel text-lg"></i> Esporta Report su Google Sheets
+        </button>
+        <button type="button" onclick="nuovaSessione()" 
+                class="py-4 px-6 rounded-2xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 font-heading font-bold text-sm transition flex items-center justify-center gap-2">
+          <i class="fa-solid fa-rotate-right"></i> Nuova Votazione
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+    <div class="glass-card rounded-2xl p-4 border border-brand-cyan/40 shadow-2xl flex items-center gap-3 max-w-sm">
+      <div class="w-10 h-10 rounded-xl bg-brand-cyan/20 text-brand-cyan flex items-center justify-center text-lg flex-shrink-0">
+        <i class="fa-solid fa-check"></i>
+      </div>
+      <div>
+        <h4 id="toastTitle" class="font-bold text-sm text-white">Notifica</h4>
+        <p id="toastMessage" class="text-xs text-slate-300">Operazione eseguita</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase SDK Modules -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // Firebase Config fallback
+    const firebaseConfig = typeof __firebase_config !== 'undefined' 
+      ? JSON.parse(__firebase_config) 
+      : { apiKey: "demo", projectId: "demo-app", authDomain: "demo-app.firebaseapp.com" };
+
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'ai-school-quest-app';
+
+    let db = null;
+    let auth = null;
+    let unsubscribeLiveClasse = null;
+
+    try {
+      const app = initializeApp(firebaseConfig);
+      db = getFirestore(app);
+      auth = getAuth(app);
+      signInAnonymously(auth).catch(err => console.log("Anon auth active"));
+    } catch(e) {
+      console.log("Firestore local fallback mode");
+    }
+
+    // Expose Firebase Helpers globally
+    window.salvaRisposteSuCloud = async function(sessionData) {
+      if (!db) return;
+      try {
+        const publicCollectionPath = collection(db, 'artifacts', appId, 'public', 'data', 'sessioni_classe');
+        await addDoc(publicCollectionPath, {
+          ...sessionData,
+          timestamp: new Date().toISOString()
+        });
+      } catch (err) {
+        console.error("Errore salvataggio cloud:", err);
+      }
+    };
+
+    window.ascoltaDatiClasseLive = function(codiceSessione, callback) {
+      if (!db) return;
+      if (unsubscribeLiveClasse) unsubscribeLiveClasse();
+
+      const publicCollectionPath = collection(db, 'artifacts', appId, 'public', 'data', 'sessioni_classe');
+
+      unsubscribeLiveClasse = onSnapshot(publicCollectionPath, (snapshot) => {
+        const risposteTuttaClasse = [];
+        let gruppiCompletati = 0;
+
+        snapshot.forEach((doc) => {
+          const data = doc.data();
+          if (data.codiceSessione && data.codiceSessione.toLowerCase() === codiceSessione.toLowerCase()) {
+            gruppiCompletati++;
+            if (data.risposte && Array.isArray(data.risposte)) {
+              data.risposte.forEach(r => risposteTuttaClasse.push(r));
+            }
+          }
+        });
+
+        callback({
+          gruppiCompletati: gruppiCompletati,
+          risposte: risposteTuttaClasse
+        });
+      }, (error) => {
+        console.log("Error listening live class data:", error);
+      });
+    };
+  </script>
+
+  <!-- Script Logica App -->
+  <script>
+    let sessionData = {
+      scuola: '',
+      grado: '',
+      classe: '',
+      codiceSessione: '',
+      totalePartecipanti: 1,
+      studenteAttualeIndex: 1,
+      risposte: []
+    };
+
+    let datiClasseLive = [];
+    let numeroGruppiFiniti = 1;
+    let vistaAttuale = 'classe';
+
+    let attualiSelezioneStudente = {
+      usaAi: '',
+      frequenza: '',
+      strumenti: [],
+      scopi: []
+    };
+
+    let chartFrequenzaInstance = null;
+    let chartStrumentiInstance = null;
+    let chartScopiInstance = null;
+
+    function modificaPartecipanti(delta) {
+      let val = sessionData.totalePartecipanti + delta;
+      if (val < 1) val = 1;
+      if (val > 10) val = 10;
+      sessionData.totalePartecipanti = val;
+      document.getElementById('numPartecipantiDisplay').innerText = val;
+    }
+
+    function avviaGioco() {
+      sessionData.scuola = document.getElementById('scuola').value.trim();
+      sessionData.grado = document.getElementById('grado').value;
+      sessionData.classe = document.getElementById('classe').value.trim();
+      sessionData.codiceSessione = (document.getElementById('codiceSessione').value.trim() || sessionData.classe).toUpperCase();
+      sessionData.studenteAttualeIndex = 1;
+      sessionData.risposte = [];
+
+      document.getElementById('labelInfoGruppo').innerText = `${sessionData.scuola} • Classe ${sessionData.classe} [ID: ${sessionData.codiceSessione}]`;
+      document.getElementById('displayCodiceSessione').innerText = `#${sessionData.codiceSessione}`;
+
+      resetFormStudente();
+      aggiornaUiGiocatoreCorrente();
+      mostraStep('step-quiz');
+    }
+
+    function aggiornaUiGiocatoreCorrente() {
+      const idx = sessionData.studenteAttualeIndex;
+      const tot = sessionData.totalePartecipanti;
+
+      document.getElementById('labelGiocatoreCorrente').innerText = `Giocatore ${idx}`;
+      document.getElementById('badgeProgresso').innerText = `${idx} di ${tot}`;
+      
+      const percent = Math.round((idx / tot) * 100);
+      document.getElementById('progressBar').style.width = `${percent}%`;
+
+      const btnTesto = document.getElementById('btnTestoSalva');
+      if (idx === tot) {
+        btnTesto.innerText = "Registra Voto e Sincronizza con la Classe!";
+      } else {
+        btnTesto.innerText = "Registra Voto e Passa al Prossimo";
+      }
+
+      const avatars = ['fa-user-astronaut', 'fa-user-ninja', 'fa-user-secret', 'fa-robot', 'fa-gamepad'];
+      const avatarEl = document.getElementById('avatarContainer');
+      const selectedAvatar = avatars[(idx - 1) % avatars.length];
+      avatarEl.innerHTML = `<i class="fa-solid ${selectedAvatar}"></i>`;
+    }
+
+    function selezionaOpzioneSingola(campo, valore, el) {
+      attualiSelezioneStudente[campo] = valore;
+      document.querySelectorAll(`.option-${campo}`).forEach(card => card.classList.remove('selected'));
+      el.classList.add('selected');
+      document.getElementById(`input${campo.charAt(0).toUpperCase() + campo.slice(1)}`).value = valore;
+    }
+
+    function toggleMultiOpzione(campo, valore, el) {
+      let arr = attualiSelezioneStudente[campo];
+      
+      if (valore === 'Nessuno') {
+        arr = ['Nessuno'];
+        document.querySelectorAll(`.option-${campo === 'strumenti' ? 'strumento' : 'scopo'}`).forEach(card => card.classList.remove('selected'));
+        el.classList.add('selected');
+      } else {
+        const idxNessuno = arr.indexOf('Nessuno');
+        if (idxNessuno > -1) arr.splice(idxNessuno, 1);
+        
+        document.querySelectorAll(`.option-${campo === 'strumenti' ? 'strumento' : 'scopo'}`).forEach(card => {
+          if(card.innerText.includes('Nessuno')) card.classList.remove('selected');
+        });
+
+        const index = arr.indexOf(valore);
+        if (index > -1) {
+          arr.splice(index, 1);
+          el.classList.remove('selected');
+        } else {
+          arr.push(valore);
+          el.classList.add('selected');
+        }
+      }
+
+      attualiSelezioneStudente[campo] = arr;
+
+      if (campo === 'strumenti') {
+        const altroContainer = document.getElementById('containerAltroStrumento');
+        if (arr.includes('Altro')) {
+          altroContainer.classList.remove('hidden');
+        } else {
+          altroContainer.classList.add('hidden');
+          document.getElementById('inputAltroStrumento').value = '';
+        }
+      }
+
+      if (campo === 'scopi') {
+        const altroContainer = document.getElementById('containerAltroScopo');
+        if (arr.includes('Altro')) {
+          altroContainer.classList.remove('hidden');
+        } else {
+          altroContainer.classList.add('hidden');
+          document.getElementById('inputAltroScopo').value = '';
+        }
+      }
+    }
+
+    function registraRispostaStudente() {
+      if (!attualiSelezioneStudente.usaAi) {
+        showToast('Attenzione', 'Seleziona se usi l\'Intelligenza Artificiale!', 'warning');
+        return;
+      }
+      if (!attualiSelezioneStudente.frequenza) {
+        showToast('Attenzione', 'Seleziona la tua frequenza d\'uso!', 'warning');
+        return;
+      }
+
+      const altroStrumentoTesto = document.getElementById('inputAltroStrumento').value.trim();
+      const altroScopoTesto = document.getElementById('inputAltroScopo').value.trim();
+      const rispostaLibera = document.getElementById('rispostaLibera').value.trim();
+
+      let strumentiSalvati = [...attualiSelezioneStudente.strumenti];
+      if (strumentiSalvati.includes('Altro') && altroStrumentoTesto) {
+        strumentiSalvati = strumentiSalvati.map(s => s === 'Altro' ? `Altro (${altroStrumentoTesto})` : s);
+      }
+
+      let scopiSalvati = [...attualiSelezioneStudente.scopi];
+      if (scopiSalvati.includes('Altro') && altroScopoTesto) {
+        scopiSalvati = scopiSalvati.map(s => s === 'Altro' ? `Altro (${altroScopoTesto})` : s);
+      }
+
+      sessionData.risposte.push({
+        studenteId: sessionData.studenteAttualeIndex,
+        usaAi: attualiSelezioneStudente.usaAi,
+        frequenza: attualiSelezioneStudente.frequenza,
+        strumenti: strumentiSalvati,
+        scopi: scopiSalvati,
+        rispostaLibera: rispostaLibera
+      });
+
+      if (sessionData.studenteAttualeIndex < sessionData.totalePartecipanti) {
+        sessionData.studenteAttualeIndex++;
+        resetFormStudente();
+        aggiornaUiGiocatoreCorrente();
+        showToast('Voto Registrato', `Tocca al Giocatore ${sessionData.studenteAttualeIndex}!`, 'success');
+      } else {
+        completaVotazioneESincronizza();
+      }
+    }
+
+    async function completaVotazioneESincronizza() {
+      // Mostra subito i risultati locali: Firebase non deve bloccare la terza schermata.
+      datiClasseLive = [...sessionData.risposte];
+      numeroGruppiFiniti = 1;
+      mostraDashboardRisultati();
+
+      const stato = document.getElementById('statusGruppiCompletati');
+      stato.textContent = 'Risultati locali visualizzati. Sincronizzazione in corso…';
+
+      try {
+        if (typeof window.salvaRisposteSuCloud !== 'function') {
+          stato.textContent = 'Risultati visibili su questo dispositivo. Firebase non è collegato.';
+          return;
+        }
+
+        await window.salvaRisposteSuCloud(sessionData);
+
+        if (typeof window.ascoltaDatiClasseLive === 'function') {
+          window.ascoltaDatiClasseLive(sessionData.codiceSessione, (dataLive) => {
+            datiClasseLive = Array.isArray(dataLive.risposte) ? dataLive.risposte : [];
+            numeroGruppiFiniti = Number(dataLive.gruppiCompletati) || 0;
+            stato.textContent =
+              `${numeroGruppiFiniti} gruppi hanno inviato i dati (${datiClasseLive.length} studenti totali)`;
+
+            if (vistaAttuale === 'classe') calcolaEAgiornaDashboard('classe');
+          });
+        }
+      } catch (errore) {
+        console.error('Sincronizzazione non riuscita:', errore);
+        stato.textContent = 'Dashboard locale attiva. Controlla la configurazione Firebase per sincronizzare le classi.';
+        showToast('Dashboard disponibile', 'I risultati sono visibili; la sincronizzazione cloud va configurata.', 'warning');
+      }
+    }
+
+    function resetFormStudente() {
+      attualiSelezioneStudente = { usaAi: '', frequenza: '', strumenti: [], scopi: [] };
+      document.querySelectorAll('.option-card').forEach(card => card.classList.remove('selected'));
+      document.getElementById('inputUsaAi').value = '';
+      document.getElementById('inputFrequenza').value = '';
+      document.getElementById('inputAltroStrumento').value = '';
+      document.getElementById('inputAltroScopo').value = '';
+      document.getElementById('rispostaLibera').value = '';
+      document.getElementById('containerAltroStrumento').classList.add('hidden');
+      document.getElementById('containerAltroScopo').classList.add('hidden');
+    }
+
+    function mostraDashboardRisultati() {
+      mostraStep('step-results');
+      calcolaEAgiornaDashboard('classe');
+    }
+
+    function calcolaEAgiornaDashboard(tipoVista) {
+      vistaAttuale = tipoVista;
+      let dataset = sessionData.risposte;
+
+      const classiBottoni = {
+        gruppo: 'px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-brand-purple text-white shadow-lg shadow-purple-500/30 transition',
+        classe: 'px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-brand-cyan text-white shadow-lg shadow-cyan-500/30 transition',
+        grado: 'px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-brand-pink text-white shadow-lg shadow-pink-500/30 transition'
+      };
+      const classeInattiva = 'px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-slate-800 text-slate-300 hover:bg-slate-700 transition';
+
+      document.getElementById('btnFiltroGruppo').className = tipoVista === 'gruppo' ? classiBottoni.gruppo : classeInattiva;
+      document.getElementById('btnFiltroClasse').className = tipoVista === 'classe' ? classiBottoni.classe : classeInattiva;
+      document.getElementById('btnFiltroGrado').className = tipoVista === 'grado' ? classiBottoni.grado : classeInattiva;
+
+      if (tipoVista === 'classe') {
+        dataset = datiClasseLive.length ? datiClasseLive : sessionData.risposte;
+      } else if (tipoVista === 'grado') {
+        // Non inventare statistiche: non esiste ancora una raccolta globale per grado.
+        dataset = [];
+        document.getElementById('subtitolorisultati').innerText =
+          'I dati globali per grado saranno disponibili quando verrà collegato un archivio condiviso.';
+      } else {
+        document.getElementById('subtitolorisultati').innerText =
+          'Risultati dei partecipanti di questo gruppo.';
+      }
+
+      if (tipoVista === 'classe') {
+        document.getElementById('subtitolorisultati').innerText =
+          'Risposte raccolte per la sessione di classe selezionata.';
+      }
+
+      const frequenzeCount = { 'Giornaliera': 0, 'Settimanale': 0, 'Mensile': 0, 'Rara/Mai': 0 };
+      const strumentiCount = {};
+      const scopiCount = {};
+      const noteRaccolte = [];
+      let usaSi = 0;
+
+      dataset.forEach(r => {
+        if (r.usaAi === 'Sì' || r.usaAi === 'A volte') usaSi++;
+        if (Object.prototype.hasOwnProperty.call(frequenzeCount, r.frequenza)) {
+          frequenzeCount[r.frequenza]++;
+        }
+
+        (Array.isArray(r.strumenti) ? r.strumenti : []).forEach(strumento => {
+          const label = String(strumento).startsWith('Altro') ? 'Altro' : strumento;
+          strumentiCount[label] = (strumentiCount[label] || 0) + 1;
+          if (String(strumento).startsWith('Altro (')) noteRaccolte.push(`Strumento: ${strumento}`);
+        });
+
+        (Array.isArray(r.scopi) ? r.scopi : []).forEach(scopo => {
+          const label = String(scopo).startsWith('Altro') ? 'Altro' : scopo;
+          scopiCount[label] = (scopiCount[label] || 0) + 1;
+          if (String(scopo).startsWith('Altro (')) noteRaccolte.push(`Scopo: ${scopo}`);
+        });
+
+        if (r.rispostaLibera) {
+          noteRaccolte.push(`Giocatore ${r.studenteId || 'Anonimo'}: "${r.rispostaLibera}"`);
+        }
+      });
+
+      const totale = dataset.length;
+      const percentuale = totale ? Math.round((usaSi / totale) * 100) : 0;
+      document.getElementById('kpiTotalePartecipanti').innerText = totale;
+      document.getElementById('kpiUsoPercent').innerText = `${percentuale}%`;
+
+      const topTool = Object.entries(strumentiCount).sort((a, b) => b[1] - a[1])[0]?.[0] || '-';
+      document.getElementById('kpiToolTop').innerText = topTool;
+
+      const containerNote = document.getElementById('containerNoteLibere');
+      if (noteRaccolte.length) {
+        // textContent evita che eventuali caratteri HTML inseriti dagli utenti vengano interpretati.
+        containerNote.replaceChildren(...noteRaccolte.map(n => {
+          const span = document.createElement('span');
+          span.className = 'px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-slate-300 font-medium';
+          span.textContent = n;
+          return span;
+        }));
+      } else {
+        const span = document.createElement('span');
+        span.className = 'text-slate-500 italic';
+        span.textContent = 'Nessuna nota aggiuntiva inserita per questa vista.';
+        containerNote.replaceChildren(span);
+      }
+
+      renderChartFrequenza(frequenzeCount);
+      renderChartStrumenti(strumentiCount);
+      renderChartScopi(scopiCount);
+    }
+
+    function cambiaVistaFiltro(tipo) {
+      calcolaEAgiornaDashboard(tipo);
+    }
+
+    function renderChartFrequenza(dataMap) {
+      const ctx = document.getElementById('chartFrequenza').getContext('2d');
+      if (chartFrequenzaInstance) chartFrequenzaInstance.destroy();
+
+      chartFrequenzaInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: Object.keys(dataMap),
+          datasets: [{
+            data: Object.values(dataMap),
+            backgroundColor: ['#EC4899', '#06B6D4', '#8B5CF6', '#64748B'],
+            borderWidth: 2,
+            borderColor: '#1E293B'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom', labels: { color: '#94A3B8', font: { family: 'Plus Jakarta Sans', size: 12 } } }
+          }
+        }
+      });
+    }
+
+    function renderChartStrumenti(dataMap) {
+      const ctx = document.getElementById('chartStrumenti').getContext('2d');
+      if (chartStrumentiInstance) chartStrumentiInstance.destroy();
+
+      const labels = Object.keys(dataMap);
+      const data = Object.values(dataMap);
+
+      chartStrumentiInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels.length ? labels : ['Nessuno'],
+          datasets: [{
+            label: 'Numero Studenti',
+            data: data.length ? data : [0],
+            backgroundColor: '#06B6D4',
+            borderRadius: 8
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { color: '#94A3B8', stepSize: 1 }, grid: { color: '#334155' } },
+            y: { ticks: { color: '#F8FAFC' }, grid: { display: false } }
+          }
+        }
+      });
+    }
+
+    function renderChartScopi(dataMap) {
+      const ctx = document.getElementById('chartScopi').getContext('2d');
+      if (chartScopiInstance) chartScopiInstance.destroy();
+
+      const labels = Object.keys(dataMap);
+      const data = Object.values(dataMap);
+
+      chartScopiInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels.length ? labels : ['Studio'],
+          datasets: [{
+            label: 'Preferenze',
+            data: data.length ? data : [0],
+            backgroundColor: '#8B5CF6',
+            borderRadius: 8
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { color: '#F8FAFC' }, grid: { display: false } },
+            y: { ticks: { color: '#94A3B8', stepSize: 1 }, grid: { color: '#334155' } }
+          }
+        }
+      });
+    }
+
+    function generaDatiSimulatiAggregati(count) {
+      const mockList = [];
+      const freqOpt = ['Giornaliera', 'Settimanale', 'Mensile', 'Rara/Mai'];
+      const toolOpt = ['ChatGPT', 'Gemini', 'Canva AI', 'Copilot', 'Claude'];
+      const scopOpt = ['Studio/Compiti', 'Scrittura/Riassunti', 'Coding/Problemi', 'Arte/Immagini', 'Svago'];
+
+      for(let i=0; i<count; i++) {
+        mockList.push({
+          usaAi: Math.random() > 0.2 ? 'Sì' : 'No',
+          frequenza: freqOpt[Math.floor(Math.random() * freqOpt.length)],
+          strumenti: [toolOpt[Math.floor(Math.random() * toolOpt.length)]],
+          scopi: [scopOpt[Math.floor(Math.random() * scopOpt.length)]]
+        });
+      }
+      return mockList;
+    }
+
+    function inviaDatiAGoogleSheets() {
+      const righe = [
+        ['Scuola', 'Grado', 'Classe', 'Codice sessione', 'Studente', 'Usa AI', 'Frequenza', 'Strumenti', 'Scopi', 'Note'],
+        ...sessionData.risposte.map(r => [
+          sessionData.scuola, sessionData.grado, sessionData.classe, sessionData.codiceSessione,
+          r.studenteId, r.usaAi, r.frequenza,
+          (r.strumenti || []).join('; '), (r.scopi || []).join('; '), r.rispostaLibera || ''
+        ])
+      ];
+      const csv = '\uFEFF' + righe.map(r => r.map(v =>
+        '"' + String(v ?? '').replace(/"/g, '""') + '"'
+      ).join(';')).join('\r\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `report-${sessionData.codiceSessione || 'classe'}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      showToast('Esportazione completata', 'È stato scaricato un file CSV apribile con Excel o Google Sheets.', 'success');
+    }
+
+    function nuovaSessione() {
+      if (confirm("Vuoi iniziare una nuova sessione di voto? I dati di questo gruppo verranno azzerati.")) {
+        sessionData.studenteAttualeIndex = 1;
+        sessionData.risposte = [];
+        datiClasseLive = [];
+        numeroGruppiFiniti = 1;
+        resetFormStudente();
+        document.getElementById('statusGruppiCompletati').textContent = 'Raccolta in corso...';
+        document.getElementById('numPartecipantiDisplay').textContent = sessionData.totalePartecipanti;
+        mostraStep('step-setup');
+      }
+    }
+
+    function mostraStep(stepId) {
+      document.querySelectorAll('.step-view').forEach(el => el.classList.remove('active'));
+      document.getElementById(stepId).classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function showToast(title, msg, type = 'success') {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastTitle').innerText = title;
+      document.getElementById('toastMessage').innerText = msg;
+
+      toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+      
+      setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+      }, 3500);
+    }
+  </script>
+</body>
+</html>
