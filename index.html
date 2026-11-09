@@ -96,6 +96,9 @@
       <p class="text-slate-400 text-sm sm:text-base mt-2 max-w-lg mx-auto">
         Iniziamo a conoscere l'argomento con un breve sondaggio.
       </p>
+      <button type="button" onclick="apriAccessoInsegnante()" class="mt-4 text-xs text-slate-400 hover:text-brand-cyan underline underline-offset-4">
+        <i class="fa-solid fa-lock mr-1"></i> Accesso insegnanti
+      </button>
     </header>
 
     <!-- STEP 1: CONFIGURAZIONE GRUPPO & CLASSE -->
@@ -332,39 +335,54 @@
       </div>
     </div>
 
+    <!-- SCHERMATA CONFERMA STUDENTI -->
+    <div id="step-done" class="step-view">
+      <div class="glass-card rounded-3xl p-8 sm:p-10 text-center shadow-2xl">
+        <div class="w-20 h-20 mx-auto rounded-full bg-emerald-500/15 border border-emerald-500/40 text-emerald-400 flex items-center justify-center text-4xl mb-5">
+          <i class="fa-solid fa-check"></i>
+        </div>
+        <h2 class="font-heading text-3xl font-extrabold text-white mb-3">Grazie per aver partecipato!</h2>
+        <p id="esitoInvioCloud" class="text-slate-300 mb-7">Le risposte sono state inviate.</p>
+        <button type="button" onclick="nuovaSessione()" class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-brand-cyan to-brand-purple text-white font-heading font-bold">Torna all'inizio</button>
+      </div>
+    </div>
+
+    <!-- ACCESSO RISERVATO INSEGNANTI -->
+    <div id="step-teacher-login" class="step-view">
+      <div class="glass-card rounded-3xl p-6 sm:p-10 shadow-2xl max-w-xl mx-auto">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-12 h-12 rounded-2xl bg-brand-purple/20 text-brand-purple flex items-center justify-center text-xl"><i class="fa-solid fa-lock"></i></div>
+          <div><h2 class="font-heading text-2xl font-bold text-white">Area insegnanti</h2><p class="text-xs text-slate-400">Accesso riservato alla dashboard aggregata</p></div>
+        </div>
+        <form id="teacherLoginForm" class="space-y-4" onsubmit="event.preventDefault(); eseguiLoginInsegnante();">
+          <div><label for="teacherEmail" class="block text-sm font-semibold mb-2">Email</label><input id="teacherEmail" type="email" autocomplete="username" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white" placeholder="nome@scuola.it"></div>
+          <div><label for="teacherPassword" class="block text-sm font-semibold mb-2">Password</label><input id="teacherPassword" type="password" autocomplete="current-password" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white" placeholder="Password"></div>
+          <p id="teacherLoginError" class="hidden text-sm text-rose-400" role="alert"></p>
+          <button id="teacherLoginButton" type="submit" class="w-full py-3 rounded-xl bg-brand-purple hover:opacity-90 text-white font-bold">Accedi alla dashboard</button>
+          <button type="button" onclick="tornaAlSondaggio()" class="w-full py-2 text-sm text-slate-400 hover:text-white">Torna al sondaggio</button>
+        </form>
+      </div>
+    </div>
+
     <!-- STEP 3: DASHBOARD RISULTATI & STATISTICHE -->
     <div id="step-results" class="step-view">
       
       <!-- Banner di Congratulazioni & Lobby Live -->
       <div class="glass-card rounded-3xl p-6 sm:p-8 mb-6 border border-emerald-500/30 text-center relative overflow-hidden">
         <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-sm font-bold mb-3">
-          <i class="fa-solid fa-satellite-dish animate-pulse text-emerald-400"></i> Sessione Live Classe Attiva
+          <i class="fa-solid fa-shield-halved text-emerald-400"></i> Area riservata insegnanti
         </div>
-        <h2 class="text-3xl font-extrabold text-white">Dashboard Risultati della Classe</h2>
-        <p id="subtitolorisultati" class="text-slate-400 text-sm mt-1">Sincronizzato in tempo reale con tutti i gruppi connessi.</p>
+        <h2 class="text-3xl font-extrabold text-white">Dashboard aggregata</h2>
+        <p id="subtitolorisultati" class="text-slate-400 text-sm mt-1">Dati di tutte le classi raccolti su Firebase.</p>
 
-        <!-- Dynamic Filter Bar (Singolo Gruppo vs Classe Live vs Globale) -->
-        <div class="flex flex-wrap items-center justify-center gap-2 mt-6">
-          <button type="button" onclick="cambiaVistaFiltro('gruppo')" id="btnFiltroGruppo" 
-                  class="px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-slate-800 text-slate-300 hover:bg-slate-700 transition">
-            <i class="fa-solid fa-user-group mr-1.5"></i> Il Tuo Gruppo
-          </button>
-          <button type="button" onclick="cambiaVistaFiltro('classe')" id="btnFiltroClasse" 
-                  class="px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-brand-cyan text-white shadow-lg shadow-cyan-500/30 transition">
-            <i class="fa-solid fa-users text-white mr-1.5"></i> Intera Classe (Live)
-          </button>
-          <button type="button" onclick="cambiaVistaFiltro('grado')" id="btnFiltroGrado" 
-                  class="px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-slate-800 text-slate-300 hover:bg-slate-700 transition">
-            <i class="fa-solid fa-earth-americas mr-1.5"></i> Globale (Tutti i dati)
-          </button>
-        </div>
+        <p class="text-xs text-slate-400 mt-5">La dashboard mostra tutte le sessioni disponibili nel database.</p>
       </div>
 
       <!-- Live Group Tracker Status Bar -->
       <div class="glass-card rounded-2xl p-4 mb-6 border border-slate-700/60 flex flex-wrap items-center justify-between gap-3">
         <div class="flex items-center gap-2">
           <span class="w-3 h-3 rounded-full bg-emerald-500 animate-ping"></span>
-          <span class="text-xs sm:text-sm font-bold text-white">Stato Gruppi della Sessione <span id="displayCodiceSessione" class="font-mono text-emerald-400">#---</span>:</span>
+          <span class="text-xs sm:text-sm font-bold text-white">Stato archivio Firebase:</span>
         </div>
         <div id="statusGruppiCompletati" class="text-xs sm:text-sm font-semibold text-slate-300">
           Raccolta in corso...
@@ -451,11 +469,11 @@
       <div class="flex flex-col sm:flex-row gap-4">
         <button type="button" onclick="inviaDatiAGoogleSheets()" 
                 class="flex-1 py-4 px-6 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-heading font-bold text-sm shadow-lg shadow-emerald-900/30 transition flex items-center justify-center gap-2">
-          <i class="fa-solid fa-file-excel text-lg"></i> Esporta Report su Google Sheets
+          <i class="fa-solid fa-file-excel text-lg"></i> Scarica report aggregato CSV
         </button>
-        <button type="button" onclick="nuovaSessione()" 
+        <button type="button" onclick="esciAreaInsegnante()" 
                 class="py-4 px-6 rounded-2xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 font-heading font-bold text-sm transition flex items-center justify-center gap-2">
-          <i class="fa-solid fa-rotate-right"></i> Nuova Votazione
+          <i class="fa-solid fa-right-from-bracket"></i> Esci dall'area insegnanti
         </button>
       </div>
 
@@ -478,70 +496,100 @@
   <!-- Firebase SDK Modules -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getAuth, signInAnonymously, signInWithEmailAndPassword, signOut, setPersistence, inMemoryPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    // Firebase Config fallback
-    const firebaseConfig = typeof __firebase_config !== 'undefined' 
-      ? JSON.parse(__firebase_config) 
-      : { apiKey: "demo", projectId: "demo-app", authDomain: "demo-app.firebaseapp.com" };
-
-    const appId = typeof __app_id !== 'undefined' ? __app_id : 'ai-school-quest-app';
-
-    let db = null;
-    let auth = null;
-    let unsubscribeLiveClasse = null;
-
-    try {
-      const app = initializeApp(firebaseConfig);
-      db = getFirestore(app);
-      auth = getAuth(app);
-      signInAnonymously(auth).catch(err => console.log("Anon auth active"));
-    } catch(e) {
-      console.log("Firestore local fallback mode");
-    }
-
-    // Expose Firebase Helpers globally
-    window.salvaRisposteSuCloud = async function(sessionData) {
-      if (!db) return;
-      try {
-        const publicCollectionPath = collection(db, 'artifacts', appId, 'public', 'data', 'sessioni_classe');
-        await addDoc(publicCollectionPath, {
-          ...sessionData,
-          timestamp: new Date().toISOString()
-        });
-      } catch (err) {
-        console.error("Errore salvataggio cloud:", err);
-      }
+    const firebaseConfig = {
+      apiKey: "AIzaSyCaWA3O2mbYRMLnBJPOBsEkr-87ZKeBP_I",
+      authDomain: "sondaggio-ai.firebaseapp.com",
+      projectId: "sondaggio-ai",
+      storageBucket: "sondaggio-ai.firebasestorage.app",
+      messagingSenderId: "415275334630",
+      appId: "1:415275334630:web:823fb2988e426c32043427",
+      measurementId: "G-NT1GCJ6NLT"
     };
 
-    window.ascoltaDatiClasseLive = function(codiceSessione, callback) {
-      if (!db) return;
-      if (unsubscribeLiveClasse) unsubscribeLiveClasse();
+    const appId = 'ai-school-quest-app';
+    const teacherEmailAuthorized = 'pputignano@fdeducation.org';
+    const firebaseApp = initializeApp(firebaseConfig);
+    const auth = getAuth(firebaseApp);
+    const db = getFirestore(firebaseApp);
+    const publicCollection = collection(db, 'artifacts', appId, 'public', 'data', 'sessioni_classe');
+    let unsubscribeTeacherDashboard = null;
 
-      const publicCollectionPath = collection(db, 'artifacts', appId, 'public', 'data', 'sessioni_classe');
+    // La persistenza in memoria evita che il login insegnante resti attivo
+    // per il successivo gruppo di studenti che usa lo stesso dispositivo.
+    window.firebaseReady = (async () => {
+      await setPersistence(auth, inMemoryPersistence);
+      if (!auth.currentUser) await signInAnonymously(auth);
+      return true;
+    })().catch(error => {
+      console.error('Inizializzazione Firebase non riuscita:', error);
+      throw error;
+    });
 
-      unsubscribeLiveClasse = onSnapshot(publicCollectionPath, (snapshot) => {
-        const risposteTuttaClasse = [];
-        let gruppiCompletati = 0;
+    window.salvaRisposteSuCloud = async function(sessionData) {
+      await window.firebaseReady;
+      if (!auth.currentUser || !auth.currentUser.isAnonymous) {
+        await signOut(auth);
+        await signInAnonymously(auth);
+      }
+      const record = {
+        scuola: String(sessionData.scuola || ''),
+        grado: String(sessionData.grado || ''),
+        classe: String(sessionData.classe || ''),
+        codiceSessione: String(sessionData.codiceSessione || ''),
+        totalePartecipanti: Number(sessionData.totalePartecipanti),
+        studenteAttualeIndex: Number(sessionData.studenteAttualeIndex),
+        risposte: Array.isArray(sessionData.risposte) ? sessionData.risposte : [],
+        timestamp: new Date().toISOString()
+      };
+      await addDoc(publicCollection, record);
+    };
 
-        snapshot.forEach((doc) => {
-          const data = doc.data();
-          if (data.codiceSessione && data.codiceSessione.toLowerCase() === codiceSessione.toLowerCase()) {
-            gruppiCompletati++;
-            if (data.risposte && Array.isArray(data.risposte)) {
-              data.risposte.forEach(r => risposteTuttaClasse.push(r));
-            }
+    window.loginFirebaseInsegnante = async function(email, password) {
+      await window.firebaseReady;
+      const credential = await signInWithEmailAndPassword(auth, email, password);
+      if ((credential.user.email || '').toLowerCase() !== teacherEmailAuthorized) {
+        await signOut(auth);
+        await signInAnonymously(auth);
+        throw new Error('Questo account non è autorizzato alla dashboard.');
+      }
+      return true;
+    };
+
+    window.ascoltaDashboardInsegnante = function(callback, onError) {
+      if (!auth.currentUser || (auth.currentUser.email || '').toLowerCase() !== teacherEmailAuthorized) {
+        throw new Error('Accesso insegnante non autorizzato.');
+      }
+      if (unsubscribeTeacherDashboard) unsubscribeTeacherDashboard();
+      unsubscribeTeacherDashboard = onSnapshot(publicCollection, snapshot => {
+        const sessioni = [];
+        const risposte = [];
+        snapshot.forEach(docSnap => {
+          const data = docSnap.data();
+          sessioni.push({ id: docSnap.id, ...data });
+          if (Array.isArray(data.risposte)) {
+            data.risposte.forEach(r => risposte.push({
+              ...r,
+              scuola: data.scuola || '',
+              grado: data.grado || '',
+              classe: data.classe || '',
+              codiceSessione: data.codiceSessione || ''
+            }));
           }
         });
+        callback({ sessioni, risposte });
+      }, onError);
+    };
 
-        callback({
-          gruppiCompletati: gruppiCompletati,
-          risposte: risposteTuttaClasse
-        });
-      }, (error) => {
-        console.log("Error listening live class data:", error);
-      });
+    window.logoutFirebaseInsegnante = async function() {
+      if (unsubscribeTeacherDashboard) {
+        unsubscribeTeacherDashboard();
+        unsubscribeTeacherDashboard = null;
+      }
+      await signOut(auth);
+      await signInAnonymously(auth);
     };
   </script>
 
@@ -558,6 +606,8 @@
     };
 
     let datiClasseLive = [];
+    let datiAggregatiInsegnante = [];
+    let numeroSessioniInsegnante = 0;
     let numeroGruppiFiniti = 1;
     let vistaAttuale = 'classe';
 
@@ -718,36 +768,17 @@
     }
 
     async function completaVotazioneESincronizza() {
-      // Mostra subito i risultati locali: Firebase non deve bloccare la terza schermata.
-      datiClasseLive = [...sessionData.risposte];
-      numeroGruppiFiniti = 1;
-      mostraDashboardRisultati();
-
-      const stato = document.getElementById('statusGruppiCompletati');
-      stato.textContent = 'Risultati locali visualizzati. Sincronizzazione in corso…';
-
+      const esito = document.getElementById('esitoInvioCloud');
+      esito.textContent = 'Invio delle risposte in corso…';
+      mostraStep('step-done');
       try {
-        if (typeof window.salvaRisposteSuCloud !== 'function') {
-          stato.textContent = 'Risultati visibili su questo dispositivo. Firebase non è collegato.';
-          return;
-        }
-
+        if (typeof window.salvaRisposteSuCloud !== 'function') throw new Error('Firebase non è disponibile.');
         await window.salvaRisposteSuCloud(sessionData);
-
-        if (typeof window.ascoltaDatiClasseLive === 'function') {
-          window.ascoltaDatiClasseLive(sessionData.codiceSessione, (dataLive) => {
-            datiClasseLive = Array.isArray(dataLive.risposte) ? dataLive.risposte : [];
-            numeroGruppiFiniti = Number(dataLive.gruppiCompletati) || 0;
-            stato.textContent =
-              `${numeroGruppiFiniti} gruppi hanno inviato i dati (${datiClasseLive.length} studenti totali)`;
-
-            if (vistaAttuale === 'classe') calcolaEAgiornaDashboard('classe');
-          });
-        }
+        esito.textContent = 'Le risposte sono state inviate correttamente. Grazie per aver partecipato!';
       } catch (errore) {
         console.error('Sincronizzazione non riuscita:', errore);
-        stato.textContent = 'Dashboard locale attiva. Controlla la configurazione Firebase per sincronizzare le classi.';
-        showToast('Dashboard disponibile', 'I risultati sono visibili; la sincronizzazione cloud va configurata.', 'warning');
+        esito.textContent = 'Non è stato possibile inviare le risposte. Avvisa l’insegnante prima di chiudere questa pagina.';
+        showToast('Invio non riuscito', 'Controllare la connessione e la configurazione Firebase.', 'warning');
       }
     }
 
@@ -769,36 +800,9 @@
     }
 
     function calcolaEAgiornaDashboard(tipoVista) {
-      vistaAttuale = tipoVista;
-      let dataset = sessionData.risposte;
-
-      const classiBottoni = {
-        gruppo: 'px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-brand-purple text-white shadow-lg shadow-purple-500/30 transition',
-        classe: 'px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-brand-cyan text-white shadow-lg shadow-cyan-500/30 transition',
-        grado: 'px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-brand-pink text-white shadow-lg shadow-pink-500/30 transition'
-      };
-      const classeInattiva = 'px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-slate-800 text-slate-300 hover:bg-slate-700 transition';
-
-      document.getElementById('btnFiltroGruppo').className = tipoVista === 'gruppo' ? classiBottoni.gruppo : classeInattiva;
-      document.getElementById('btnFiltroClasse').className = tipoVista === 'classe' ? classiBottoni.classe : classeInattiva;
-      document.getElementById('btnFiltroGrado').className = tipoVista === 'grado' ? classiBottoni.grado : classeInattiva;
-
-      if (tipoVista === 'classe') {
-        dataset = datiClasseLive.length ? datiClasseLive : sessionData.risposte;
-      } else if (tipoVista === 'grado') {
-        // Non inventare statistiche: non esiste ancora una raccolta globale per grado.
-        dataset = [];
-        document.getElementById('subtitolorisultati').innerText =
-          'I dati globali per grado saranno disponibili quando verrà collegato un archivio condiviso.';
-      } else {
-        document.getElementById('subtitolorisultati').innerText =
-          'Risultati dei partecipanti di questo gruppo.';
-      }
-
-      if (tipoVista === 'classe') {
-        document.getElementById('subtitolorisultati').innerText =
-          'Risposte raccolte per la sessione di classe selezionata.';
-      }
+      const dataset = datiAggregatiInsegnante;
+      document.getElementById('subtitolorisultati').innerText =
+        'Vista aggregata di tutte le sessioni inviate dalle classi.';
 
       const frequenzeCount = { 'Giornaliera': 0, 'Settimanale': 0, 'Mensile': 0, 'Rara/Mai': 0 };
       const strumentiCount = {};
@@ -808,38 +812,29 @@
 
       dataset.forEach(r => {
         if (r.usaAi === 'Sì' || r.usaAi === 'A volte') usaSi++;
-        if (Object.prototype.hasOwnProperty.call(frequenzeCount, r.frequenza)) {
-          frequenzeCount[r.frequenza]++;
-        }
-
+        if (Object.prototype.hasOwnProperty.call(frequenzeCount, r.frequenza)) frequenzeCount[r.frequenza]++;
         (Array.isArray(r.strumenti) ? r.strumenti : []).forEach(strumento => {
           const label = String(strumento).startsWith('Altro') ? 'Altro' : strumento;
           strumentiCount[label] = (strumentiCount[label] || 0) + 1;
           if (String(strumento).startsWith('Altro (')) noteRaccolte.push(`Strumento: ${strumento}`);
         });
-
         (Array.isArray(r.scopi) ? r.scopi : []).forEach(scopo => {
           const label = String(scopo).startsWith('Altro') ? 'Altro' : scopo;
           scopiCount[label] = (scopiCount[label] || 0) + 1;
           if (String(scopo).startsWith('Altro (')) noteRaccolte.push(`Scopo: ${scopo}`);
         });
-
-        if (r.rispostaLibera) {
-          noteRaccolte.push(`Giocatore ${r.studenteId || 'Anonimo'}: "${r.rispostaLibera}"`);
-        }
+        if (r.rispostaLibera) noteRaccolte.push(`${r.scuola || ''} ${r.classe || ''} — ${r.rispostaLibera}`);
       });
 
       const totale = dataset.length;
-      const percentuale = totale ? Math.round((usaSi / totale) * 100) : 0;
       document.getElementById('kpiTotalePartecipanti').innerText = totale;
-      document.getElementById('kpiUsoPercent').innerText = `${percentuale}%`;
-
-      const topTool = Object.entries(strumentiCount).sort((a, b) => b[1] - a[1])[0]?.[0] || '-';
-      document.getElementById('kpiToolTop').innerText = topTool;
+      document.getElementById('kpiUsoPercent').innerText = `${totale ? Math.round((usaSi / totale) * 100) : 0}%`;
+      document.getElementById('kpiToolTop').innerText = Object.entries(strumentiCount).sort((a,b) => b[1]-a[1])[0]?.[0] || '-';
+      document.getElementById('statusGruppiCompletati').textContent =
+        `${numeroSessioniInsegnante ? 'Archivio aggiornato' : 'Nessuna sessione ancora presente'} — ${numeroSessioniInsegnante} sessioni, ${totale} risposte`;
 
       const containerNote = document.getElementById('containerNoteLibere');
       if (noteRaccolte.length) {
-        // textContent evita che eventuali caratteri HTML inseriti dagli utenti vengano interpretati.
         containerNote.replaceChildren(...noteRaccolte.map(n => {
           const span = document.createElement('span');
           span.className = 'px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-slate-300 font-medium';
@@ -849,10 +844,9 @@
       } else {
         const span = document.createElement('span');
         span.className = 'text-slate-500 italic';
-        span.textContent = 'Nessuna nota aggiuntiva inserita per questa vista.';
+        span.textContent = 'Nessuna nota aggiuntiva inserita.';
         containerNote.replaceChildren(span);
       }
-
       renderChartFrequenza(frequenzeCount);
       renderChartStrumenti(strumentiCount);
       renderChartScopi(scopiCount);
@@ -860,6 +854,55 @@
 
     function cambiaVistaFiltro(tipo) {
       calcolaEAgiornaDashboard(tipo);
+    }
+
+    function apriAccessoInsegnante() {
+      document.getElementById('teacherLoginError').classList.add('hidden');
+      document.getElementById('teacherPassword').value = '';
+      mostraStep('step-teacher-login');
+    }
+
+    function tornaAlSondaggio() { mostraStep('step-setup'); }
+
+    async function eseguiLoginInsegnante() {
+      const email = document.getElementById('teacherEmail').value.trim().toLowerCase();
+      const password = document.getElementById('teacherPassword').value;
+      const errorEl = document.getElementById('teacherLoginError');
+      const button = document.getElementById('teacherLoginButton');
+      errorEl.classList.add('hidden');
+      button.disabled = true;
+      button.textContent = 'Accesso in corso…';
+      try {
+        if (email !== 'pputignano@fdeducation.org') throw new Error('Email non autorizzata.');
+        await window.loginFirebaseInsegnante(email, password);
+        mostraStep('step-results');
+        document.getElementById('statusGruppiCompletati').textContent = 'Caricamento archivio Firebase…';
+        window.ascoltaDashboardInsegnante(data => {
+          datiAggregatiInsegnante = data.risposte;
+          numeroSessioniInsegnante = data.sessioni.length;
+          calcolaEAgiornaDashboard('classe');
+        }, error => {
+          console.error('Errore lettura dashboard:', error);
+          document.getElementById('statusGruppiCompletati').textContent = 'Errore durante la lettura dei dati. Verifica le regole Firestore.';
+        });
+      } catch (error) {
+        console.error('Login insegnante:', error);
+        errorEl.textContent = error.code === 'auth/invalid-credential'
+          ? 'Email o password non corretti.'
+          : (error.message || 'Accesso non riuscito.');
+        errorEl.classList.remove('hidden');
+      } finally {
+        button.disabled = false;
+        button.textContent = 'Accedi alla dashboard';
+      }
+    }
+
+    async function esciAreaInsegnante() {
+      try { await window.logoutFirebaseInsegnante(); }
+      catch (error) { console.error('Logout:', error); }
+      datiAggregatiInsegnante = [];
+      numeroSessioniInsegnante = 0;
+      mostraStep('step-setup');
     }
 
     function renderChartFrequenza(dataMap) {
@@ -968,25 +1011,23 @@
     function inviaDatiAGoogleSheets() {
       const righe = [
         ['Scuola', 'Grado', 'Classe', 'Codice sessione', 'Studente', 'Usa AI', 'Frequenza', 'Strumenti', 'Scopi', 'Note'],
-        ...sessionData.risposte.map(r => [
-          sessionData.scuola, sessionData.grado, sessionData.classe, sessionData.codiceSessione,
-          r.studenteId, r.usaAi, r.frequenza,
+        ...datiAggregatiInsegnante.map(r => [
+          r.scuola || '', r.grado || '', r.classe || '', r.codiceSessione || '',
+          r.studenteId || '', r.usaAi || '', r.frequenza || '',
           (r.strumenti || []).join('; '), (r.scopi || []).join('; '), r.rispostaLibera || ''
         ])
       ];
-      const csv = '\uFEFF' + righe.map(r => r.map(v =>
-        '"' + String(v ?? '').replace(/"/g, '""') + '"'
-      ).join(';')).join('\r\n');
+      const csv = '\uFEFF' + righe.map(r => r.map(v => '"' + String(v ?? '').replace(/"/g, '""') + '"').join(';')).join('\r\n');
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `report-${sessionData.codiceSessione || 'classe'}.csv`;
+      link.download = 'report-aggregato-sondaggio-ai.csv';
       document.body.appendChild(link);
       link.click();
       link.remove();
       URL.revokeObjectURL(url);
-      showToast('Esportazione completata', 'È stato scaricato un file CSV apribile con Excel o Google Sheets.', 'success');
+      showToast('Esportazione completata', 'È stato scaricato il report aggregato CSV.', 'success');
     }
 
     function nuovaSessione() {
