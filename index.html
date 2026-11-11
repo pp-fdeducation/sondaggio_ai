@@ -877,7 +877,7 @@
       button.disabled = true;
       button.textContent = 'Accesso in corso…';
       try {
-        if (!teacherEmailsAuthorized.includes(email)) throw new Error('Email non autorizzata.');
+        if (!['pputignano@fdeducation.org', 'p.putignano94@gmail.com'].includes(email)) throw new Error('Email non autorizzata.');
         await window.loginFirebaseInsegnante(email, password);
         mostraStep('step-results');
         document.getElementById('statusGruppiCompletati').textContent = 'Caricamento archivio Firebase…';
