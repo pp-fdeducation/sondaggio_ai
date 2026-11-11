@@ -511,7 +511,10 @@
     };
 
     const appId = 'ai-school-quest-app';
-    const teacherEmailAuthorized = 'pputignano@fdeducation.org';
+    const teacherEmailsAuthorized = [
+      'pputignano@fdeducation.org',
+      'p.putignano94@gmail.com'
+    ];
     const firebaseApp = initializeApp(firebaseConfig);
     const auth = getAuth(firebaseApp);
     const db = getFirestore(firebaseApp);
@@ -551,7 +554,7 @@
     window.loginFirebaseInsegnante = async function(email, password) {
       await window.firebaseReady;
       const credential = await signInWithEmailAndPassword(auth, email, password);
-      if ((credential.user.email || '').toLowerCase() !== teacherEmailAuthorized) {
+      if (!teacherEmailsAuthorized.includes((credential.user.email || '').trim().toLowerCase())) {
         await signOut(auth);
         await signInAnonymously(auth);
         throw new Error('Questo account non è autorizzato alla dashboard.');
@@ -560,7 +563,7 @@
     };
 
     window.ascoltaDashboardInsegnante = function(callback, onError) {
-      if (!auth.currentUser || (auth.currentUser.email || '').toLowerCase() !== teacherEmailAuthorized) {
+      if (!auth.currentUser || !teacherEmailsAuthorized.includes((auth.currentUser.email || '').trim().toLowerCase())) {
         throw new Error('Accesso insegnante non autorizzato.');
       }
       if (unsubscribeTeacherDashboard) unsubscribeTeacherDashboard();
@@ -874,7 +877,7 @@
       button.disabled = true;
       button.textContent = 'Accesso in corso…';
       try {
-        if (email !== 'pputignano@fdeducation.org') throw new Error('Email non autorizzata.');
+        if (!teacherEmailsAuthorized.includes(email)) throw new Error('Email non autorizzata.');
         await window.loginFirebaseInsegnante(email, password);
         mostraStep('step-results');
         document.getElementById('statusGruppiCompletati').textContent = 'Caricamento archivio Firebase…';
