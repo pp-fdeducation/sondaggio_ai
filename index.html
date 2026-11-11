@@ -78,6 +78,14 @@
       from { opacity: 0; transform: translateY(12px); }
       to { opacity: 1; transform: translateY(0); }
     }
+
+    /* Modalità proiezione: grafici e numeri più leggibili sulla LIM */
+    #step-results.projection-mode .projection-chart-area { height:  min(48vh, 460px) !important; min-height: 320px; }
+    #step-results.projection-mode .projection-chart-wide { height: min(58vh, 540px) !important; min-height: 360px; }
+    #step-results.projection-mode .projection-kpi { padding: 1.5rem; }
+    #step-results.projection-mode .projection-kpi-value { font-size: clamp(2rem, 4vw, 3.4rem); }
+    #step-results.projection-mode .teacher-private-section, #step-results.projection-mode .dashboard-filter-controls { display: none !important; }
+    #step-results.projection-mode .chart-card { border-color: rgba(6,182,212,.45); box-shadow: 0 0 24px rgba(6,182,212,.08); }
   </style>
 </head>
 <body class="font-sans text-slate-100 min-h-screen pb-12 flex flex-col justify-between">
@@ -390,35 +398,67 @@
         </div>
       </div>
 
+      <!-- Filtri archivio: per codice oppure archivio complessivo -->
+      <section class="glass-card rounded-2xl p-4 sm:p-5 mb-6 border border-brand-cyan/30">
+        <div class="flex flex-col lg:flex-row lg:items-end gap-4 justify-between dashboard-filter-controls">
+          <div class="flex-1">
+            <label for="filtroCodiceDashboard" class="block text-sm font-bold text-white mb-2">
+              <i class="fa-solid fa-key text-emerald-400 mr-1.5"></i> Cerca un sondaggio tramite codice
+            </label>
+            <input id="filtroCodiceDashboard" type="text" autocomplete="off"
+              placeholder="Inserisci il codice, es. AI2026"
+              class="w-full bg-slate-900 border border-slate-600 focus:border-brand-cyan rounded-xl px-4 py-3 text-white placeholder-slate-500 outline-none font-mono uppercase tracking-wider">
+            <p class="text-xs text-slate-400 mt-2">Il codice raccoglie insieme tutte le risposte, anche se scuola, classe o giorno sono diversi.</p>
+          </div>
+          <div class="flex flex-col sm:flex-row gap-2">
+            <button type="button" onclick="applicaFiltroCodiceDashboard()"
+              class="px-5 py-3 rounded-xl bg-brand-cyan hover:opacity-90 text-slate-950 font-bold text-sm">
+              <i class="fa-solid fa-magnifying-glass mr-1"></i> Mostra codice
+            </button>
+            <button type="button" onclick="mostraArchivioCompleto()"
+              class="px-5 py-3 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-bold text-sm border border-slate-600">
+              <i class="fa-solid fa-layer-group mr-1"></i> Tutti i sondaggi
+            </button>
+          </div>
+        </div>
+        <div class="mt-3 flex flex-wrap items-center justify-between gap-2">
+          <div id="etichettaFiltroDashboard" class="text-sm font-bold text-brand-cyan">Vista: archivio completo</div>
+          <button id="btnModalitaProiezione" type="button" onclick="toggleModalitaProiezione()"
+            class="px-4 py-2 rounded-xl bg-brand-purple/20 hover:bg-brand-purple/30 border border-brand-purple/40 text-white text-sm font-bold">
+            <i class="fa-solid fa-display mr-1"></i> Modalità proiezione
+          </button>
+        </div>
+      </section>
+
       <!-- Stat KPI Cards -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <div class="glass-card rounded-2xl p-5 border-l-4 border-l-brand-cyan flex items-center gap-4">
+        <div class="glass-card rounded-2xl p-5 border-l-4 border-l-brand-cyan flex items-center gap-4 projection-kpi">
           <div class="w-12 h-12 rounded-xl bg-brand-cyan/20 text-brand-cyan flex items-center justify-center text-xl">
             <i class="fa-solid fa-users-viewfinder"></i>
           </div>
           <div>
             <div class="text-xs text-slate-400 uppercase tracking-wider font-bold">Studenti Votanti</div>
-            <div id="kpiTotalePartecipanti" class="text-2xl font-black text-white">0</div>
+            <div id="kpiTotalePartecipanti" class="text-2xl font-black text-white projection-kpi-value">0</div>
           </div>
         </div>
 
-        <div class="glass-card rounded-2xl p-5 border-l-4 border-l-brand-pink flex items-center gap-4">
+        <div class="glass-card rounded-2xl p-5 border-l-4 border-l-brand-pink flex items-center gap-4 projection-kpi">
           <div class="w-12 h-12 rounded-xl bg-brand-pink/20 text-brand-pink flex items-center justify-center text-xl">
             <i class="fa-solid fa-chart-line"></i>
           </div>
           <div>
             <div class="text-xs text-slate-400 uppercase tracking-wider font-bold">Utilizzano l'AI</div>
-            <div id="kpiUsoPercent" class="text-2xl font-black text-white">0%</div>
+            <div id="kpiUsoPercent" class="text-2xl font-black text-white projection-kpi-value">0%</div>
           </div>
         </div>
 
-        <div class="glass-card rounded-2xl p-5 border-l-4 border-l-brand-purple flex items-center gap-4">
+        <div class="glass-card rounded-2xl p-5 border-l-4 border-l-brand-purple flex items-center gap-4 projection-kpi">
           <div class="w-12 h-12 rounded-xl bg-brand-purple/20 text-brand-purple flex items-center justify-center text-xl">
             <i class="fa-solid fa-trophy"></i>
           </div>
           <div>
             <div class="text-xs text-slate-400 uppercase tracking-wider font-bold">Tool Preferito</div>
-            <div id="kpiToolTop" class="text-xl font-bold text-white truncate max-w-[130px]">-</div>
+            <div id="kpiToolTop" class="text-xl font-bold text-white truncate max-w-[130px] projection-kpi-value">-</div>
           </div>
         </div>
       </div>
@@ -542,7 +582,7 @@
         scuola: String(sessionData.scuola || ''),
         grado: String(sessionData.grado || ''),
         classe: String(sessionData.classe || ''),
-        codiceSessione: String(sessionData.codiceSessione || ''),
+        codiceSessione: String(sessionData.codiceSessione || '').normalize('NFKC').trim().toUpperCase().replace(/\s+/g, ''),
         totalePartecipanti: Number(sessionData.totalePartecipanti),
         studenteAttualeIndex: Number(sessionData.studenteAttualeIndex),
         risposte: Array.isArray(sessionData.risposte) ? sessionData.risposte : [],
@@ -579,7 +619,8 @@
               scuola: data.scuola || '',
               grado: data.grado || '',
               classe: data.classe || '',
-              codiceSessione: data.codiceSessione || ''
+              codiceSessione: normalizzaCodiceSessione(data.codiceSessione),
+              timestamp: data.timestamp || ''
             }));
           }
         });
@@ -626,6 +667,10 @@
     let chartStrumentiInstance = null;
     let chartScopiInstance = null;
 
+    function normalizzaCodiceSessione(codice) {
+      return String(codice || '').normalize('NFKC').trim().toUpperCase().replace(/\s+/g, '');
+    }
+
     function modificaPartecipanti(delta) {
       let val = sessionData.totalePartecipanti + delta;
       if (val < 1) val = 1;
@@ -638,7 +683,13 @@
       sessionData.scuola = document.getElementById('scuola').value.trim();
       sessionData.grado = document.getElementById('grado').value;
       sessionData.classe = document.getElementById('classe').value.trim();
-      sessionData.codiceSessione = (document.getElementById('codiceSessione').value.trim() || sessionData.classe).toUpperCase();
+      sessionData.codiceSessione = normalizzaCodiceSessione(document.getElementById('codiceSessione').value);
+      if (!sessionData.codiceSessione) {
+        showToast('Codice necessario', 'Inserisci il codice condiviso del sondaggio.', 'warning');
+        document.getElementById('codiceSessione').focus();
+        return;
+      }
+      document.getElementById('codiceSessione').value = sessionData.codiceSessione;
       sessionData.studenteAttualeIndex = 1;
       sessionData.risposte = [];
 
@@ -803,10 +854,65 @@
       calcolaEAgiornaDashboard('classe');
     }
 
+    function ottieniDatasetDashboard() {
+      if (!filtroCodiceAttivo) return datiAggregatiInsegnante;
+      return datiAggregatiInsegnante.filter(r =>
+        normalizzaCodiceSessione(r.codiceSessione) === filtroCodiceAttivo
+      );
+    }
+
+    function aggiornaEtichettaFiltroDashboard() {
+      const label = document.getElementById('etichettaFiltroDashboard');
+      const subtitle = document.getElementById('subtitolorisultati');
+      if (filtroCodiceAttivo) {
+        const nSessioni = datiSessioniInsegnante.filter(s =>
+          normalizzaCodiceSessione(s.codiceSessione) === filtroCodiceAttivo
+        ).length;
+        label.textContent = `Vista: codice ${filtroCodiceAttivo} · ${nSessioni} gruppi/sessioni`;
+        subtitle.textContent = `Risultati complessivi del sondaggio ${filtroCodiceAttivo}, raccolti in giorni e classi differenti.`;
+      } else {
+        label.textContent = 'Vista: archivio completo · tutti i codici e tutti i giorni';
+        subtitle.textContent = 'Risultati complessivi di tutti i sondaggi e di tutte le sessioni raccolte.';
+      }
+    }
+
+    function applicaFiltroCodiceDashboard() {
+      const codice = normalizzaCodiceSessione(document.getElementById('filtroCodiceDashboard').value);
+      if (!codice) {
+        showToast('Inserisci un codice', 'Scrivi il codice del sondaggio che vuoi consultare.', 'warning');
+        document.getElementById('filtroCodiceDashboard').focus();
+        return;
+      }
+      filtroCodiceAttivo = codice;
+      document.getElementById('filtroCodiceDashboard').value = codice;
+      aggiornaEtichettaFiltroDashboard();
+      calcolaEAgiornaDashboard('codice');
+    }
+
+    function mostraArchivioCompleto() {
+      filtroCodiceAttivo = '';
+      document.getElementById('filtroCodiceDashboard').value = '';
+      aggiornaEtichettaFiltroDashboard();
+      calcolaEAgiornaDashboard('tutti');
+    }
+
+    function toggleModalitaProiezione() {
+      const dashboard = document.getElementById('step-results');
+      const attiva = dashboard.classList.toggle('projection-mode');
+      const button = document.getElementById('btnModalitaProiezione');
+      button.innerHTML = attiva
+        ? '<i class="fa-solid fa-compress mr-1"></i> Esci da proiezione'
+        : '<i class="fa-solid fa-display mr-1"></i> Modalità proiezione';
+      setTimeout(() => {
+        [chartFrequenzaInstance, chartStrumentiInstance, chartScopiInstance].forEach(chart => {
+          if (chart) chart.resize();
+        });
+      }, 150);
+    }
+
     function calcolaEAgiornaDashboard(tipoVista) {
-      const dataset = datiAggregatiInsegnante;
-      document.getElementById('subtitolorisultati').innerText =
-        'Vista aggregata di tutte le sessioni inviate dalle classi.';
+      const dataset = ottieniDatasetDashboard();
+      aggiornaEtichettaFiltroDashboard();
 
       const frequenzeCount = { 'Giornaliera': 0, 'Settimanale': 0, 'Mensile': 0, 'Rara/Mai': 0 };
       const strumentiCount = {};
@@ -834,8 +940,11 @@
       document.getElementById('kpiTotalePartecipanti').innerText = totale;
       document.getElementById('kpiUsoPercent').innerText = `${totale ? Math.round((usaSi / totale) * 100) : 0}%`;
       document.getElementById('kpiToolTop').innerText = Object.entries(strumentiCount).sort((a,b) => b[1]-a[1])[0]?.[0] || '-';
+      const sessioniVisibili = filtroCodiceAttivo
+        ? datiSessioniInsegnante.filter(s => normalizzaCodiceSessione(s.codiceSessione) === filtroCodiceAttivo).length
+        : numeroSessioniInsegnante;
       document.getElementById('statusGruppiCompletati').textContent =
-        `${numeroSessioniInsegnante ? 'Archivio aggiornato' : 'Nessuna sessione ancora presente'} — ${numeroSessioniInsegnante} sessioni, ${totale} risposte`;
+        `${sessioniVisibili ? 'Archivio aggiornato' : 'Nessuna sessione per questa selezione'} — ${sessioniVisibili} sessioni, ${totale} risposte`;
 
       const containerNote = document.getElementById('containerNoteLibere');
       if (noteRaccolte.length) {
@@ -883,8 +992,9 @@
         document.getElementById('statusGruppiCompletati').textContent = 'Caricamento archivio Firebase…';
         window.ascoltaDashboardInsegnante(data => {
           datiAggregatiInsegnante = data.risposte;
+          datiSessioniInsegnante = data.sessioni;
           numeroSessioniInsegnante = data.sessioni.length;
-          calcolaEAgiornaDashboard('classe');
+          mostraArchivioCompleto();
         }, error => {
           console.error('Errore lettura dashboard:', error);
           document.getElementById('statusGruppiCompletati').textContent = 'Errore durante la lettura dei dati. Verifica le regole Firestore.';
@@ -905,7 +1015,9 @@
       try { await window.logoutFirebaseInsegnante(); }
       catch (error) { console.error('Logout:', error); }
       datiAggregatiInsegnante = [];
+      datiSessioniInsegnante = [];
       numeroSessioniInsegnante = 0;
+      filtroCodiceAttivo = '';
       mostraStep('step-setup');
     }
 
@@ -928,7 +1040,14 @@
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
-            legend: { position: 'bottom', labels: { color: '#94A3B8', font: { family: 'Plus Jakarta Sans', size: 12 } } }
+            legend: { position: 'bottom', labels: { color: '#E2E8F0', padding: 18, font: { family: 'Plus Jakarta Sans', size: 14, weight: 'bold' } } },
+            tooltip: { callbacks: { label: (context) => {
+              const values = context.dataset.data || [];
+              const total = values.reduce((sum, value) => sum + Number(value || 0), 0);
+              const value = Number(context.raw || 0);
+              const percent = total ? Math.round(value / total * 100) : 0;
+              return ` ${context.label}: ${value} studenti (${percent}%)`;
+            } } }
           }
         }
       });
@@ -1015,7 +1134,7 @@
     function inviaDatiAGoogleSheets() {
       const righe = [
         ['Scuola', 'Grado', 'Classe', 'Codice sessione', 'Studente', 'Usa AI', 'Frequenza', 'Strumenti', 'Scopi', 'Note'],
-        ...datiAggregatiInsegnante.map(r => [
+        ...ottieniDatasetDashboard().map(r => [
           r.scuola || '', r.grado || '', r.classe || '', r.codiceSessione || '',
           r.studenteId || '', r.usaAi || '', r.frequenza || '',
           (r.strumenti || []).join('; '), (r.scopi || []).join('; '), r.rispostaLibera || ''
@@ -1026,7 +1145,7 @@
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = 'report-aggregato-sondaggio-ai.csv';
+      link.download = filtroCodiceAttivo ? `report-sondaggio-${filtroCodiceAttivo}.csv` : 'report-aggregato-tutti-i-sondaggi.csv';
       document.body.appendChild(link);
       link.click();
       link.remove();
