@@ -79,19 +79,73 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Modalità proiezione: grafici e numeri più leggibili sulla LIM */
-    #step-results.projection-mode .projection-chart-area { height:  min(48vh, 460px) !important; min-height: 320px; }
-    #step-results.projection-mode .projection-chart-wide { height: min(58vh, 540px) !important; min-height: 360px; }
-    #step-results.projection-mode .projection-kpi { padding: 1.5rem; }
-    #step-results.projection-mode .projection-kpi-value { font-size: clamp(2rem, 4vw, 3.4rem); }
-    #step-results.projection-mode .teacher-private-section, #step-results.projection-mode .dashboard-filter-controls { display: none !important; }
-    #step-results.projection-mode .chart-card { border-color: rgba(6,182,212,.45); box-shadow: 0 0 24px rgba(6,182,212,.08); }
+    /* Modalità proiezione desktop: dashboard completa in una sola schermata */
+    @media (min-width: 900px) {
+      body.projection-active { overflow: hidden; padding: 0 !important; }
+      body.projection-active #app-shell {
+        position: fixed; inset: 0; z-index: 40; width: 100%; max-width: none;
+        height: 100vh; height: 100dvh; margin: 0; padding: 10px 14px;
+        overflow: hidden; display: block;
+      }
+      body.projection-active #step-results.projection-mode {
+        height: 100%; width: 100%; overflow: hidden; display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-rows: 34px 82px minmax(0, 1fr) 92px;
+        gap: 10px; align-content: stretch;
+      }
+      body.projection-active #step-results.projection-mode > .glass-card:first-child { display: none !important; }
+      body.projection-active #step-results.projection-mode > .glass-card:nth-child(2) {
+        grid-column: 1 / 3; grid-row: 1; min-height: 0; margin: 0; padding: 6px 12px;
+        border-radius: 12px; display: flex; align-items: center; justify-content: space-between;
+      }
+      body.projection-active #step-results.projection-mode > section:nth-child(3) {
+        grid-column: 3; grid-row: 1; min-height: 0; margin: 0; padding: 0;
+        border: 0; background: transparent; box-shadow: none; display: flex; align-items: center; justify-content: flex-end;
+      }
+      body.projection-active #step-results.projection-mode .dashboard-filter-controls,
+      body.projection-active #step-results.projection-mode #etichettaFiltroDashboard { display: none !important; }
+      body.projection-active #step-results.projection-mode #btnModalitaProiezione { padding: 7px 12px; font-size: 12px; white-space: nowrap; }
+      body.projection-active #step-results.projection-mode > .grid.grid-cols-1.sm\:grid-cols-3 {
+        grid-column: 1 / -1; grid-row: 2; grid-template-columns: repeat(3,minmax(0,1fr));
+        gap: 10px; margin: 0; min-height: 0;
+      }
+      body.projection-active #step-results.projection-mode .projection-kpi { padding: 10px 16px; gap: 12px; min-height: 0; border-radius: 14px; }
+      body.projection-active #step-results.projection-mode .projection-kpi > div:first-child { width: 38px; height: 38px; flex: 0 0 38px; font-size: 17px; }
+      body.projection-active #step-results.projection-mode .projection-kpi-value { font-size: clamp(1.5rem, 2.2vw, 2.5rem); line-height: 1.05; }
+      body.projection-active #step-results.projection-mode > .grid.md\:grid-cols-2 { display: contents; }
+      body.projection-active #step-results.projection-mode > .grid.md\:grid-cols-2 > .glass-card,
+      body.projection-active #step-results.projection-mode > .glass-card:nth-child(6) {
+        grid-row: 3; min-width: 0; min-height: 0; margin: 0; padding: 12px;
+        border-radius: 16px; display: flex; flex-direction: column; overflow: hidden;
+      }
+      body.projection-active #step-results.projection-mode > .grid.md\:grid-cols-2 > .glass-card:nth-child(1) { grid-column: 1; }
+      body.projection-active #step-results.projection-mode > .grid.md\:grid-cols-2 > .glass-card:nth-child(2) { grid-column: 2; }
+      body.projection-active #step-results.projection-mode > .glass-card:nth-child(6) { grid-column: 3; }
+      body.projection-active #step-results.projection-mode .glass-card h3 { font-size: clamp(12px, 1.05vw, 16px); margin-bottom: 6px; flex: 0 0 auto; }
+      body.projection-active #step-results.projection-mode .glass-card .h-64,
+      body.projection-active #step-results.projection-mode .projection-chart-area,
+      body.projection-active #step-results.projection-mode .projection-chart-wide {
+        height: auto !important; min-height: 0 !important; flex: 1 1 auto; width: 100%; position: relative;
+      }
+      body.projection-active #step-results.projection-mode > .glass-card:nth-child(7) {
+        grid-column: 1 / -1; grid-row: 4; min-height: 0; margin: 0; padding: 8px 12px;
+        border-radius: 14px; overflow: hidden;
+      }
+      body.projection-active #step-results.projection-mode > .glass-card:nth-child(7) h3 { margin: 0 0 4px; font-size: 12px; }
+      body.projection-active #step-results.projection-mode #containerNoteLibere { max-height: none; overflow: hidden; font-size: 10px; }
+      body.projection-active #step-results.projection-mode > .flex.flex-col.sm\:flex-row { display: none !important; }
+      body.projection-active #step-results.projection-mode .chart-card { border-color: rgba(6,182,212,.45); box-shadow: 0 0 18px rgba(6,182,212,.08); }
+    }
+    @media (max-width: 899px) {
+      #step-results.projection-mode { overflow: visible; }
+      #step-results.projection-mode .dashboard-filter-controls { display: none !important; }
+    }
   </style>
 </head>
 <body class="font-sans text-slate-100 min-h-screen pb-12 flex flex-col justify-between">
 
   <!-- Main Container -->
-  <div class="max-w-4xl mx-auto px-4 sm:px-6 pt-6 sm:pt-10 w-full">
+  <div id="app-shell" class="max-w-4xl mx-auto px-4 sm:px-6 pt-6 sm:pt-10 w-full">
 
     <!-- Header App -->
     <header class="text-center mb-8">
@@ -865,6 +919,7 @@
     function toggleModalitaProiezione() {
       const dashboard = document.getElementById('step-results');
       const attiva = dashboard.classList.toggle('projection-mode');
+      document.body.classList.toggle('projection-active', attiva);
       const button = document.getElementById('btnModalitaProiezione');
       button.innerHTML = attiva
         ? '<i class="fa-solid fa-compress mr-1"></i> Esci da proiezione'
@@ -873,7 +928,7 @@
         [chartFrequenzaInstance, chartStrumentiInstance, chartScopiInstance].forEach(chart => {
           if (chart) chart.resize();
         });
-      }, 150);
+      }, 180);
     }
 
     function calcolaEAgiornaDashboard(tipoVista) {
