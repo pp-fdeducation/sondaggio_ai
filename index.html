@@ -105,7 +105,7 @@
         Iniziamo a conoscere l'argomento con un breve sondaggio.
       </p>
       <button type="button" onclick="apriAccessoInsegnante()" class="mt-4 text-xs text-slate-400 hover:text-brand-cyan underline underline-offset-4">
-        <i class="fa-solid fa-lock mr-1"></i> Accesso Educatori
+        <i class="fa-solid fa-chart-column mr-1"></i> Area Educatori
       </button>
     </header>
 
@@ -356,30 +356,13 @@
       </div>
     </div>
 
-    <!-- ACCESSO RISERVATO INSEGNANTI -->
-    <div id="step-teacher-login" class="step-view">
-      <div class="glass-card rounded-3xl p-6 sm:p-10 shadow-2xl max-w-xl mx-auto">
-        <div class="flex items-center gap-3 mb-6">
-          <div class="w-12 h-12 rounded-2xl bg-brand-purple/20 text-brand-purple flex items-center justify-center text-xl"><i class="fa-solid fa-lock"></i></div>
-          <div><h2 class="font-heading text-2xl font-bold text-white">Area Educatori</h2><p class="text-xs text-slate-400">Accesso riservato alla dashboard aggregata</p></div>
-        </div>
-        <form id="teacherLoginForm" class="space-y-4" onsubmit="event.preventDefault(); eseguiLoginInsegnante();">
-          <div><label for="teacherEmail" class="block text-sm font-semibold mb-2">Email</label><input id="teacherEmail" type="email" autocomplete="username" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white" placeholder="nome@scuola.it"></div>
-          <div><label for="teacherPassword" class="block text-sm font-semibold mb-2">Password</label><input id="teacherPassword" type="password" autocomplete="current-password" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white" placeholder="Password"></div>
-          <p id="teacherLoginError" class="hidden text-sm text-rose-400" role="alert"></p>
-          <button id="teacherLoginButton" type="submit" class="w-full py-3 rounded-xl bg-brand-purple hover:opacity-90 text-white font-bold">Accedi alla dashboard</button>
-          <button type="button" onclick="tornaAlSondaggio()" class="w-full py-2 text-sm text-slate-400 hover:text-white">Torna al sondaggio</button>
-        </form>
-      </div>
-    </div>
-
     <!-- STEP 3: DASHBOARD RISULTATI & STATISTICHE -->
     <div id="step-results" class="step-view">
       
       <!-- Banner di Congratulazioni & Lobby Live -->
       <div class="glass-card rounded-3xl p-6 sm:p-8 mb-6 border border-emerald-500/30 text-center relative overflow-hidden">
         <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-sm font-bold mb-3">
-          <i class="fa-solid fa-shield-halved text-emerald-400"></i> Area riservata Educatori
+          <i class="fa-solid fa-unlock text-emerald-400"></i> Area Educatori — accesso pubblico
         </div>
         <h2 class="text-3xl font-extrabold text-white">Dashboard aggregata</h2>
         <p id="subtitolorisultati" class="text-slate-400 text-sm mt-1">Dati di tutte le classi raccolti su Firebase.</p>
@@ -537,7 +520,7 @@
   <!-- Firebase SDK Modules -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously, signInWithEmailAndPassword, signOut, setPersistence, inMemoryPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getAuth, signInAnonymously, signOut, setPersistence, inMemoryPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -551,10 +534,6 @@
     };
 
     const appId = 'ai-school-quest-app';
-    const teacherEmailsAuthorized = [
-      'pputignano@fdeducation.org',
-      'p.putignano94@gmail.com'
-    ];
     const firebaseApp = initializeApp(firebaseConfig);
     const auth = getAuth(firebaseApp);
     const db = getFirestore(firebaseApp);
@@ -591,21 +570,8 @@
       await addDoc(publicCollection, record);
     };
 
-    window.loginFirebaseInsegnante = async function(email, password) {
-      await window.firebaseReady;
-      const credential = await signInWithEmailAndPassword(auth, email, password);
-      if (!teacherEmailsAuthorized.includes((credential.user.email || '').trim().toLowerCase())) {
-        await signOut(auth);
-        await signInAnonymously(auth);
-        throw new Error('Questo account non è autorizzato alla dashboard.');
-      }
-      return true;
-    };
-
     window.ascoltaDashboardInsegnante = function(callback, onError) {
-      if (!auth.currentUser || !teacherEmailsAuthorized.includes((auth.currentUser.email || '').trim().toLowerCase())) {
-        throw new Error('Accesso insegnante non autorizzato.');
-      }
+      if (!auth.currentUser) throw new Error('Firebase non è ancora pronto.');
       if (unsubscribeTeacherDashboard) unsubscribeTeacherDashboard();
       unsubscribeTeacherDashboard = onSnapshot(publicCollection, snapshot => {
         const sessioni = [];
@@ -969,27 +935,11 @@
       calcolaEAgiornaDashboard(tipo);
     }
 
-    function apriAccessoInsegnante() {
-      document.getElementById('teacherLoginError').classList.add('hidden');
-      document.getElementById('teacherPassword').value = '';
-      mostraStep('step-teacher-login');
-    }
-
-    function tornaAlSondaggio() { mostraStep('step-setup'); }
-
-    async function eseguiLoginInsegnante() {
-      const email = document.getElementById('teacherEmail').value.trim().toLowerCase();
-      const password = document.getElementById('teacherPassword').value;
-      const errorEl = document.getElementById('teacherLoginError');
-      const button = document.getElementById('teacherLoginButton');
-      errorEl.classList.add('hidden');
-      button.disabled = true;
-      button.textContent = 'Accesso in corso…';
+    async function apriAccessoInsegnante() {
+      mostraStep('step-results');
+      document.getElementById('statusGruppiCompletati').textContent = 'Connessione a Firebase e caricamento archivio…';
       try {
-        if (!['pputignano@fdeducation.org', 'p.putignano94@gmail.com'].includes(email)) throw new Error('Email non autorizzata.');
-        await window.loginFirebaseInsegnante(email, password);
-        mostraStep('step-results');
-        document.getElementById('statusGruppiCompletati').textContent = 'Caricamento archivio Firebase…';
+        await window.firebaseReady;
         window.ascoltaDashboardInsegnante(data => {
           datiAggregatiInsegnante = data.risposte;
           datiSessioniInsegnante = data.sessioni;
@@ -1000,14 +950,8 @@
           document.getElementById('statusGruppiCompletati').textContent = 'Errore durante la lettura dei dati. Verifica le regole Firestore.';
         });
       } catch (error) {
-        console.error('Login insegnante:', error);
-        errorEl.textContent = error.code === 'auth/invalid-credential'
-          ? 'Email o password non corretti.'
-          : (error.message || 'Accesso non riuscito.');
-        errorEl.classList.remove('hidden');
-      } finally {
-        button.disabled = false;
-        button.textContent = 'Accedi alla dashboard';
+        console.error('Apertura dashboard:', error);
+        document.getElementById('statusGruppiCompletati').textContent = 'Connessione non riuscita: ' + (error.message || 'errore sconosciuto');
       }
     }
 
