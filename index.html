@@ -140,6 +140,155 @@
       #step-results.projection-mode { overflow: visible; }
       #step-results.projection-mode .dashboard-filter-controls { display: none !important; }
     }
+
+    /* Dashboard web responsive: usa la larghezza disponibile senza alterare il sondaggio */
+    body.dashboard-open #app-shell {
+      width: min(100%, 1600px);
+      max-width: 1600px;
+      padding-left: clamp(12px, 2vw, 30px);
+      padding-right: clamp(12px, 2vw, 30px);
+    }
+    body.dashboard-open #step-results:not(.projection-mode) .glass-card {
+      min-width: 0;
+    }
+    body.dashboard-open #step-results:not(.projection-mode) .grid.md\:grid-cols-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: clamp(12px, 1.5vw, 22px);
+    }
+    body.dashboard-open #step-results:not(.projection-mode) .grid.grid-cols-1.sm\:grid-cols-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: clamp(12px, 1.5vw, 22px);
+    }
+    body.dashboard-open #step-results:not(.projection-mode) .grid.md\:grid-cols-2 > .glass-card,
+    body.dashboard-open #step-results:not(.projection-mode) > .glass-card:nth-child(6) {
+      padding: clamp(14px, 1.5vw, 24px);
+    }
+    body.dashboard-open #step-results:not(.projection-mode) canvas {
+      max-width: 100%;
+    }
+
+    @media (min-width: 1200px) {
+      body.dashboard-open #step-results:not(.projection-mode) > .grid.md\:grid-cols-2 {
+        display: contents;
+      }
+      body.dashboard-open #step-results:not(.projection-mode) > .grid.md\:grid-cols-2 > .glass-card,
+      body.dashboard-open #step-results:not(.projection-mode) > .glass-card:nth-child(6) {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+      }
+      body.dashboard-open #step-results:not(.projection-mode) > .grid.md\:grid-cols-2 > .glass-card:nth-child(1) {
+        grid-column: 1;
+      }
+      body.dashboard-open #step-results:not(.projection-mode) > .grid.md\:grid-cols-2 > .glass-card:nth-child(2) {
+        grid-column: 2;
+      }
+      body.dashboard-open #step-results:not(.projection-mode) > .glass-card:nth-child(6) {
+        grid-column: 1 / -1;
+      }
+    }
+    @media (max-width: 767px) {
+      body.dashboard-open #app-shell {
+        padding: 14px 12px 28px;
+      }
+      body.dashboard-open #step-results:not(.projection-mode) .grid.md\:grid-cols-2,
+      body.dashboard-open #step-results:not(.projection-mode) .grid.grid-cols-1.sm\:grid-cols-3 {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      body.dashboard-open #step-results:not(.projection-mode) > .glass-card,
+      body.dashboard-open #step-results:not(.projection-mode) > section {
+        margin-bottom: 14px;
+      }
+      body.dashboard-open #step-results:not(.projection-mode) .h-64 {
+        height: 250px;
+      }
+      body.dashboard-open #step-results:not(.projection-mode) .dashboard-filter-controls {
+        gap: 12px;
+      }
+    }
+
+    /* Proiezione: vera modalità full-screen sui monitor desktop */
+    @media (min-width: 1024px) and (min-height: 600px) {
+      body.projection-active #app-shell {
+        max-width: none;
+        padding: 10px clamp(12px, 1.4vw, 24px);
+      }
+      body.projection-active #app-shell > header {
+        display: none !important;
+      }
+      body.projection-active #step-results.projection-mode {
+        height: calc(100dvh - 20px);
+        min-height: 0;
+        grid-template-rows: 38px clamp(68px, 12vh, 94px) minmax(0, 1fr) clamp(64px, 11vh, 86px);
+        gap: clamp(7px, 1vh, 12px);
+      }
+      body.projection-active #step-results.projection-mode > .grid.md\:grid-cols-2 > .glass-card,
+      body.projection-active #step-results.projection-mode > .glass-card:nth-child(6) {
+        min-height: 0;
+      }
+      body.projection-active #step-results.projection-mode .projection-chart-area,
+      body.projection-active #step-results.projection-mode .projection-chart-wide,
+      body.projection-active #step-results.projection-mode .h-64 {
+        min-height: 0;
+      }
+    }
+
+    /* Tablet e finestre basse: meglio poter scorrere che tagliare i grafici */
+    @media (max-width: 1023px), (max-height: 599px) {
+      body.projection-active {
+        overflow: auto !important;
+        padding: 0 !important;
+      }
+      body.projection-active #app-shell {
+        position: relative;
+        inset: auto;
+        height: auto;
+        min-height: 100vh;
+        overflow: visible;
+        padding: 14px 12px 28px;
+      }
+      body.projection-active #app-shell > header {
+        display: block;
+      }
+      body.projection-active #step-results.projection-mode {
+        display: block;
+        height: auto;
+        overflow: visible;
+      }
+      body.projection-active #step-results.projection-mode > .glass-card,
+      body.projection-active #step-results.projection-mode > section,
+      body.projection-active #step-results.projection-mode > .grid {
+        margin-bottom: 14px;
+      }
+      body.projection-active #step-results.projection-mode > .grid.grid-cols-1.sm\:grid-cols-3 {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      body.projection-active #step-results.projection-mode > .grid.md\:grid-cols-2 {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      body.projection-active #step-results.projection-mode > .glass-card:nth-child(6) {
+        display: block;
+      }
+      body.projection-active #step-results.projection-mode .h-64 {
+        height: 260px !important;
+      }
+    }
+    @media (max-width: 600px) {
+      body.projection-active #step-results.projection-mode > .grid.grid-cols-1.sm\:grid-cols-3,
+      body.projection-active #step-results.projection-mode > .grid.md\:grid-cols-2 {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      body.projection-active #step-results.projection-mode > .glass-card:nth-child(2) {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+      body.projection-active #step-results.projection-mode .h-64 {
+        height: 230px !important;
+      }
+    }
+
   </style>
 </head>
 <body class="font-sans text-slate-100 min-h-screen pb-12 flex flex-col justify-between">
@@ -991,6 +1140,7 @@
     }
 
     async function apriAccessoInsegnante() {
+      document.body.classList.add('dashboard-open');
       mostraStep('step-results');
       document.getElementById('statusGruppiCompletati').textContent = 'Connessione a Firebase e caricamento archivio…';
       try {
@@ -1017,6 +1167,8 @@
       datiSessioniInsegnante = [];
       numeroSessioniInsegnante = 0;
       filtroCodiceAttivo = '';
+      document.body.classList.remove('dashboard-open', 'projection-active');
+      document.getElementById('step-results').classList.remove('projection-mode');
       mostraStep('step-setup');
     }
 
